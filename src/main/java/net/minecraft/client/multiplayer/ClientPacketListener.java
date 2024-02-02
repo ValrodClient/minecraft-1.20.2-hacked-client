@@ -338,7 +338,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
       this.localGameProfile = p_298329_.localGameProfile();
       this.registryAccess = p_298329_.receivedRegistries();
       this.enabledFeatures = p_298329_.enabledFeatures();
-      this.advancements = new ClientAdvancements(p_253924_, this.telemetryManager);
+      this.advancements = new ClientAdvancements(p_253924_);
       this.suggestionsProvider = new ClientSuggestionProvider(this, p_253924_);
       this.pingDebugMonitor = new PingDebugMonitor(this, p_253924_.getDebugOverlay().getPingLogger());
    }
@@ -350,7 +350,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
    public void close() {
       this.closed = true;
       this.level = null;
-      this.telemetryManager.onDisconnect();
    }
 
    public RecipeManager getRecipeManager() {
@@ -407,7 +406,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
          }, this.minecraft);
       }
 
-      this.telemetryManager.onPlayerInfoReceived(commonplayerspawninfo.gameType(), p_105030_.hardcore());
       this.minecraft.quickPlayLog().log(this.minecraft);
    }
 
@@ -724,7 +722,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
       this.connection.suspendInboundAfterProtocolChange();
       PacketUtils.ensureRunningOnSameThread(p_298839_, this, this.minecraft);
       this.minecraft.clearClientLevel(new ServerReconfigScreen(RECONFIGURE_SCREEN_MESSAGE, this.connection));
-      this.connection.setListener(new ClientConfigurationPacketListenerImpl(this.minecraft, this.connection, new CommonListenerCookie(this.localGameProfile, this.telemetryManager, this.registryAccess, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen)));
+      this.connection.setListener(new ClientConfigurationPacketListenerImpl(this.minecraft, this.connection, new CommonListenerCookie(this.localGameProfile, this.registryAccess, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen)));
       this.connection.resumeInboundAfterProtocolChange();
       this.send(new ServerboundConfigurationAcknowledgedPacket());
    }
@@ -857,7 +855,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
       PacketUtils.ensureRunningOnSameThread(p_105108_, this, this.minecraft);
       this.minecraft.level.setGameTime(p_105108_.getGameTime());
       this.minecraft.level.setDayTime(p_105108_.getDayTime());
-      this.telemetryManager.setTime(p_105108_.getGameTime());
    }
 
    public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket p_105084_) {
@@ -2133,7 +2130,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
          this.pingDebugMonitor.tick();
       }
 
-      this.telemetryManager.tick();
    }
 
    public void setKeyPair(ProfileKeyPair p_261475_) {

@@ -148,7 +148,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
       this.switchState(ClientHandshakePacketListenerImpl.State.JOINING);
       GameProfile gameprofile = p_104547_.getGameProfile();
       this.connection.send(new ServerboundLoginAcknowledgedPacket());
-      this.connection.setListener(new ClientConfigurationPacketListenerImpl(this.minecraft, this.connection, new CommonListenerCookie(gameprofile, this.minecraft.getTelemetryManager().createWorldSessionManager(this.newWorld, this.worldLoadDuration, this.minigameName), ClientRegistryLayer.createRegistryAccess().compositeAccess(), FeatureFlags.DEFAULT_FLAGS, (String)null, this.serverData, this.parent)));
+      this.connection.setListener(new ClientConfigurationPacketListenerImpl(this.minecraft, this.connection, new CommonListenerCookie(gameprofile, ClientRegistryLayer.createRegistryAccess().compositeAccess(), FeatureFlags.DEFAULT_FLAGS, (String)null, this.serverData, this.parent)));
       this.connection.send(new ServerboundCustomPayloadPacket(new BrandPayload(ClientBrandRetriever.getClientModName())));
       this.connection.send(new ServerboundClientInformationPacket(this.minecraft.options.buildPlayerInformation()));
    }

@@ -68,7 +68,7 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
    public void handleConfigurationFinished(ClientboundFinishConfigurationPacket p_299280_) {
       this.connection.suspendInboundAfterProtocolChange();
       PacketUtils.ensureRunningOnSameThread(p_299280_, this, this.minecraft);
-      this.connection.setListener(new ClientPacketListener(this.minecraft, this.connection, new CommonListenerCookie(this.localGameProfile, this.telemetryManager, this.receivedRegistries, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen)));
+      this.connection.setListener(new ClientPacketListener(this.minecraft, this.connection, new CommonListenerCookie(this.localGameProfile, this.receivedRegistries, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen)));
       this.connection.resumeInboundAfterProtocolChange();
       this.connection.send(new ServerboundFinishConfigurationPacket());
    }

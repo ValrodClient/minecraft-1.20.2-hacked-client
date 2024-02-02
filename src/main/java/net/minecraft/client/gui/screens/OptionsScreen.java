@@ -14,7 +14,6 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
-import net.minecraft.client.gui.screens.telemetry.TelemetryInfoScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
@@ -34,7 +33,6 @@ public class OptionsScreen extends Screen {
    private static final Component CHAT = Component.translatable("options.chat");
    private static final Component RESOURCEPACK = Component.translatable("options.resourcepack");
    private static final Component ACCESSIBILITY = Component.translatable("options.accessibility");
-   private static final Component TELEMETRY = Component.translatable("options.telemetry");
    private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
    private static final int COLUMNS = 2;
    private final Screen lastScreen;
@@ -78,9 +76,6 @@ public class OptionsScreen extends Screen {
       }));
       gridlayout$rowhelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> {
          return new AccessibilityOptionsScreen(this, this.options);
-      }));
-      gridlayout$rowhelper.addChild(this.openScreenButton(TELEMETRY, () -> {
-         return new TelemetryInfoScreen(this, this.options);
       }));
       gridlayout$rowhelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> {
          return new CreditsAndAttributionScreen(this);

@@ -22,7 +22,6 @@ import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -63,7 +62,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
    protected final ServerData serverData;
    @Nullable
    protected String serverBrand;
-   protected final WorldSessionTelemetryManager telemetryManager;
    @Nullable
    protected final Screen postDisconnectScreen;
    private final List<ClientCommonPacketListenerImpl.DeferredPacket> deferredPackets = new ArrayList<>();
@@ -73,7 +71,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
       this.connection = p_300688_;
       this.serverData = p_300429_.serverData();
       this.serverBrand = p_300429_.serverBrand();
-      this.telemetryManager = p_300429_.telemetryManager();
       this.postDisconnectScreen = p_300429_.postDisconnectScreen();
    }
 
@@ -95,7 +92,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
          if (custompacketpayload instanceof BrandPayload) {
             BrandPayload brandpayload = (BrandPayload)custompacketpayload;
             this.serverBrand = brandpayload.brand();
-            this.telemetryManager.onServerBrandReceived(brandpayload.brand());
          } else {
             this.handleCustomPayload(custompacketpayload);
          }
@@ -226,7 +222,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
    }
 
    public void onDisconnect(Component p_298766_) {
-      this.telemetryManager.onDisconnect();
       this.minecraft.disconnect(this.createDisconnectScreen(p_298766_));
       LOGGER.warn("Client disconnected with reason: {}", (Object)p_298766_.getString());
    }
