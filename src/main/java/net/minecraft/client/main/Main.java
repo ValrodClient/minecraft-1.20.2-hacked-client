@@ -35,8 +35,6 @@ import net.minecraft.client.Options;
 import net.minecraft.client.User;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.client.telemetry.TelemetryProperty;
-import net.minecraft.client.telemetry.events.GameLoadTimesEvent;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
@@ -57,8 +55,6 @@ public class Main {
    public static void main(String[] p_129642_) {
       Stopwatch stopwatch = Stopwatch.createStarted(Ticker.systemTicker());
       Stopwatch stopwatch1 = Stopwatch.createStarted(Ticker.systemTicker());
-      GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, stopwatch);
-      GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, stopwatch1);
       SharedConstants.tryDetectVersion();
       SharedConstants.enableDataFixerOptimizations();
       OptionParser optionparser = new OptionParser();
@@ -151,7 +147,6 @@ public class Main {
 
       CrashReport.preload();
       Bootstrap.bootStrap();
-      GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
       Bootstrap.validate();
       Util.startTimerHackThread();
       String s12 = optionspec25.value(optionset);
