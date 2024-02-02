@@ -2,6 +2,8 @@ package com.valrod.utils;
 
 import java.util.UUID;
 
+import com.valrod.client.ui.gui.screens.AltManager;
+
 import fr.litarvan.openauth.microsoft.MicrosoftAuthResult;
 import fr.litarvan.openauth.microsoft.MicrosoftAuthenticator;
 import fr.litarvan.openauth.microsoft.model.response.MinecraftProfile;
@@ -50,28 +52,24 @@ extends Thread {
 		}
 	}
 
-	public String getStatus() {
-		return this.status;
+	private void setLoginStatus(String status) {
+		AltManager.setStatus(status);
 	}
-
+	
 	@Override
 	public void run() {
 		if (this.password.equals("")) {
-			this.mc.user = new User(this.username, null, "", User.Type.LEGACY);
-			this.status = "Logged in. (" + this.username + " - offline name)";
-			return;
+			this.mc.user = new User(this.username, UUID.randomUUID(), "", User.Type.LEGACY);
+			setLoginStatus("Logged in. (" + this.username + " - offline name)");
+		}else {
+			setLoginStatus("Logging in...");
+			User auth = this.createSession(this.username, this.password);
+			if (auth == null) {
+				setLoginStatus("Login failed!");
+			} else {
+				setLoginStatus("Logged in. (" + auth.getName() + ")");
+				this.mc.user = auth;
+			}
 		}
-		this.status = "Logging in...";
-		User auth = this.createSession(this.username, this.password);
-		if (auth == null) {
-			this.status = "Login failed!";
-		} else {
-			this.status = "Logged in. (" + auth.getName() + ")";
-			this.mc.user = auth;
-		}
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
 	}
 }
