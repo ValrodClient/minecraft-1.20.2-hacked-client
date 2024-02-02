@@ -185,8 +185,8 @@ public class GuiGraphics {
       RenderSystem.setShaderColor(p_281272_, p_281734_, p_282022_, p_281752_);
    }
 
-   public void fill(int p_282988_, int p_282861_, int p_281278_, int p_281710_, int p_281470_) {
-      this.fill(p_282988_, p_282861_, p_281278_, p_281710_, 0, p_281470_);
+   public void fill(int x, int y, int endX, int endY, int color) {
+      this.fill(x, y, endX, endY, 0, color);
    }
 
    public void fill(int p_281437_, int p_283660_, int p_282606_, int p_283413_, int p_283428_, int p_283253_) {
@@ -266,15 +266,15 @@ public class GuiGraphics {
       this.drawString(p_282592_, p_281854_, p_281573_ - p_282592_.width(p_281854_) / 2, p_283511_, p_282577_);
    }
 
-   public int drawString(Font p_282003_, @Nullable String p_281403_, int p_282714_, int p_282041_, int p_281908_) {
-      return this.drawString(p_282003_, p_281403_, p_282714_, p_282041_, p_281908_, true);
+   public int drawString(Font font, @Nullable String text, int x, int y, int color) {
+      return this.drawString(font, text, x, y, color, true);
    }
 
-   public int drawString(Font p_283343_, @Nullable String p_281896_, int p_283569_, int p_283418_, int p_281560_, boolean p_282130_) {
-      if (p_281896_ == null) {
+   public int drawString(Font font, @Nullable String text, int x, int y, int color, boolean shadow) {
+      if (text == null) {
          return 0;
       } else {
-         int i = p_283343_.drawInBatch(p_281896_, (float)p_283569_, (float)p_283418_, p_281560_, p_282130_, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, p_283343_.isBidirectional());
+         int i = font.drawInBatch(text, (float)x, (float)y, color, shadow, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
          this.flushIfUnmanaged();
          return i;
       }

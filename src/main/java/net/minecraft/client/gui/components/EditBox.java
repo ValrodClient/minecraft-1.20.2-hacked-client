@@ -59,19 +59,19 @@ public class EditBox extends AbstractWidget implements Renderable {
    private Component hint;
    private long focusedTime = Util.getMillis();
 
-   public EditBox(Font p_299161_, int p_299570_, int p_297565_, Component p_300284_) {
-      this(p_299161_, 0, 0, p_299570_, p_297565_, p_300284_);
+   public EditBox(Font font, int width, int height, Component component) {
+      this(font, 0, 0, width, height, component);
    }
 
-   public EditBox(Font p_94114_, int p_94115_, int p_94116_, int p_94117_, int p_94118_, Component p_94119_) {
-      this(p_94114_, p_94115_, p_94116_, p_94117_, p_94118_, (EditBox)null, p_94119_);
+   public EditBox(Font font, int x, int y, int width, int height, Component component) {
+      this(font, x, y, width, height, (EditBox)null, component);
    }
 
-   public EditBox(Font p_94106_, int p_94107_, int p_94108_, int p_94109_, int p_94110_, @Nullable EditBox p_94111_, Component p_94112_) {
-      super(p_94107_, p_94108_, p_94109_, p_94110_, p_94112_);
-      this.font = p_94106_;
-      if (p_94111_ != null) {
-         this.setValue(p_94111_.getValue());
+   public EditBox(Font font, int x, int y, int width, int height, @Nullable EditBox template, Component component) {
+      super(x, y, width, height, component);
+      this.font = font;
+      if (template != null) {
+         this.setValue(template.getValue());
       }
 
    }
@@ -89,17 +89,17 @@ public class EditBox extends AbstractWidget implements Renderable {
       return Component.translatable("gui.narrate.editBox", component, this.value);
    }
 
-   public void setValue(String p_94145_) {
-      if (this.filter.test(p_94145_)) {
-         if (p_94145_.length() > this.maxLength) {
-            this.value = p_94145_.substring(0, this.maxLength);
+   public void setValue(String value) {
+      if (this.filter.test(value)) {
+         if (value.length() > this.maxLength) {
+            this.value = value.substring(0, this.maxLength);
          } else {
-            this.value = p_94145_;
+            this.value = value;
          }
 
          this.moveCursorToEnd(false);
          this.setHighlightPos(this.cursorPos);
-         this.onValueChange(p_94145_);
+         this.onValueChange(value);
       }
    }
 

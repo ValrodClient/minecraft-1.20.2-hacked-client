@@ -163,7 +163,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
    public float yRotO;
    public float xRotO;
    private AABB bb = INITIAL_AABB;
-   private boolean onGround;
+   protected boolean onGround;
    public boolean horizontalCollision;
    public boolean verticalCollision;
    public boolean verticalCollisionBelow;

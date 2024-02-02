@@ -21,14 +21,23 @@ public class User {
    private final Optional<String> clientId;
    private final User.Type type;
 
-   public User(String p_193799_, UUID p_297254_, String p_193800_, Optional<String> p_193802_, Optional<String> p_193803_, User.Type p_193804_) {
-      this.name = p_193799_;
-      this.uuid = p_297254_;
-      this.accessToken = p_193800_;
-      this.xuid = p_193802_;
-      this.clientId = p_193803_;
-      this.type = p_193804_;
+   public User(String name, UUID uuid, String token, Optional<String> xuid, Optional<String> clientid, User.Type type) {
+      this.name = name;
+      this.uuid = uuid;
+      this.accessToken = token;
+      this.xuid = xuid;
+      this.clientId = clientid;
+      this.type = type;
    }
+   
+   public User(String name, UUID uuid, String token, User.Type type) {
+	      this.name = name;
+	      this.uuid = uuid;
+	      this.accessToken = token;
+	      this.xuid = null;
+	      this.clientId = null;
+	      this.type = type;
+	   }
 
    public String getSessionId() {
       return "token:" + this.accessToken + ":" + UndashedUuid.toString(this.uuid);

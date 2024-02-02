@@ -128,7 +128,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
       return entityrenderer.shouldRender(p_114398_, p_114399_, p_114400_, p_114401_, p_114402_);
    }
 
-   public <E extends Entity> void render(E p_114385_, double p_114386_, double p_114387_, double p_114388_, float p_114389_, float p_114390_, PoseStack p_114391_, MultiBufferSource p_114392_, int p_114393_) {
+   public <E extends Entity> void render(E p_114385_, double p_114386_, double p_114387_, double p_114388_, float p_114389_, float p_114390_, PoseStack poseStack, MultiBufferSource mbs, int p_114393_) {
       EntityRenderer<? super E> entityrenderer = this.getRenderer(p_114385_);
 
       try {
@@ -136,27 +136,27 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
          double d2 = p_114386_ + vec3.x();
          double d3 = p_114387_ + vec3.y();
          double d0 = p_114388_ + vec3.z();
-         p_114391_.pushPose();
-         p_114391_.translate(d2, d3, d0);
-         entityrenderer.render(p_114385_, p_114389_, p_114390_, p_114391_, p_114392_, p_114393_);
+         poseStack.pushPose();
+         poseStack.translate(d2, d3, d0);
+         entityrenderer.render(p_114385_, p_114389_, p_114390_, poseStack, mbs, p_114393_);
          if (p_114385_.displayFireAnimation()) {
-            this.renderFlame(p_114391_, p_114392_, p_114385_);
+            this.renderFlame(poseStack, mbs, p_114385_);
          }
 
-         p_114391_.translate(-vec3.x(), -vec3.y(), -vec3.z());
+         poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
          if (this.options.entityShadows().get() && this.shouldRenderShadow && entityrenderer.shadowRadius > 0.0F && !p_114385_.isInvisible()) {
             double d1 = this.distanceToSqr(p_114385_.getX(), p_114385_.getY(), p_114385_.getZ());
             float f = (float)((1.0D - d1 / 256.0D) * (double)entityrenderer.shadowStrength);
             if (f > 0.0F) {
-               renderShadow(p_114391_, p_114392_, p_114385_, f, p_114390_, this.level, Math.min(entityrenderer.shadowRadius, 32.0F));
+               renderShadow(poseStack, mbs, p_114385_, f, p_114390_, this.level, Math.min(entityrenderer.shadowRadius, 32.0F));
             }
          }
 
          if (this.renderHitBoxes && !p_114385_.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-            renderHitbox(p_114391_, p_114392_.getBuffer(RenderType.lines()), p_114385_, p_114390_);
+            renderHitbox(poseStack, mbs.getBuffer(RenderType.lines()), p_114385_, p_114390_);
          }
 
-         p_114391_.popPose();
+         poseStack.popPose();
       } catch (Throwable throwable) {
          CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering entity in world");
          CrashReportCategory crashreportcategory = crashreport.addCategory("Entity being rendered");
@@ -169,44 +169,44 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
          throw new ReportedException(crashreport);
       }
    }
+   // GOTO render hitbox
+   private static void renderHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity ent, float partialTick) {
+      AABB aabb = ent.getBoundingBox().move(-ent.getX(), -ent.getY(), -ent.getZ());
+      LevelRenderer.renderLineBox(poseStack, vertexConsumer, aabb, 1.0F, 1.0F, 1.0F, 1.0F);
+      if (ent instanceof EnderDragon) {
+         double d0 = -Mth.lerp((double)partialTick, ent.xOld, ent.getX());
+         double d1 = -Mth.lerp((double)partialTick, ent.yOld, ent.getY());
+         double d2 = -Mth.lerp((double)partialTick, ent.zOld, ent.getZ());
 
-   private static void renderHitbox(PoseStack p_114442_, VertexConsumer p_114443_, Entity p_114444_, float p_114445_) {
-      AABB aabb = p_114444_.getBoundingBox().move(-p_114444_.getX(), -p_114444_.getY(), -p_114444_.getZ());
-      LevelRenderer.renderLineBox(p_114442_, p_114443_, aabb, 1.0F, 1.0F, 1.0F, 1.0F);
-      if (p_114444_ instanceof EnderDragon) {
-         double d0 = -Mth.lerp((double)p_114445_, p_114444_.xOld, p_114444_.getX());
-         double d1 = -Mth.lerp((double)p_114445_, p_114444_.yOld, p_114444_.getY());
-         double d2 = -Mth.lerp((double)p_114445_, p_114444_.zOld, p_114444_.getZ());
-
-         for(EnderDragonPart enderdragonpart : ((EnderDragon)p_114444_).getSubEntities()) {
-            p_114442_.pushPose();
-            double d3 = d0 + Mth.lerp((double)p_114445_, enderdragonpart.xOld, enderdragonpart.getX());
-            double d4 = d1 + Mth.lerp((double)p_114445_, enderdragonpart.yOld, enderdragonpart.getY());
-            double d5 = d2 + Mth.lerp((double)p_114445_, enderdragonpart.zOld, enderdragonpart.getZ());
-            p_114442_.translate(d3, d4, d5);
-            LevelRenderer.renderLineBox(p_114442_, p_114443_, enderdragonpart.getBoundingBox().move(-enderdragonpart.getX(), -enderdragonpart.getY(), -enderdragonpart.getZ()), 0.25F, 1.0F, 0.0F, 1.0F);
-            p_114442_.popPose();
+         for(EnderDragonPart enderdragonpart : ((EnderDragon)ent).getSubEntities()) {
+            poseStack.pushPose();
+            double d3 = d0 + Mth.lerp((double)partialTick, enderdragonpart.xOld, enderdragonpart.getX());
+            double d4 = d1 + Mth.lerp((double)partialTick, enderdragonpart.yOld, enderdragonpart.getY());
+            double d5 = d2 + Mth.lerp((double)partialTick, enderdragonpart.zOld, enderdragonpart.getZ());
+            poseStack.translate(d3, d4, d5);
+            LevelRenderer.renderLineBox(poseStack, vertexConsumer, enderdragonpart.getBoundingBox().move(-enderdragonpart.getX(), -enderdragonpart.getY(), -enderdragonpart.getZ()), 0.25F, 1.0F, 0.0F, 1.0F);
+            poseStack.popPose();
          }
       }
 
-      if (p_114444_ instanceof LivingEntity) {
+      if (ent instanceof LivingEntity) {
          float f1 = 0.01F;
-         LevelRenderer.renderLineBox(p_114442_, p_114443_, aabb.minX, (double)(p_114444_.getEyeHeight() - 0.01F), aabb.minZ, aabb.maxX, (double)(p_114444_.getEyeHeight() + 0.01F), aabb.maxZ, 1.0F, 0.0F, 0.0F, 1.0F);
+         LevelRenderer.renderLineBox(poseStack, vertexConsumer, aabb.minX, (double)(ent.getEyeHeight() - 0.01F), aabb.minZ, aabb.maxX, (double)(ent.getEyeHeight() + 0.01F), aabb.maxZ, 1.0F, 0.0F, 0.0F, 1.0F);
       }
 
-      Entity entity = p_114444_.getVehicle();
+      Entity entity = ent.getVehicle();
       if (entity != null) {
-         float f = Math.min(entity.getBbWidth(), p_114444_.getBbWidth()) / 2.0F;
+         float f = Math.min(entity.getBbWidth(), ent.getBbWidth()) / 2.0F;
          float f2 = 0.0625F;
-         Vec3 vec3 = entity.getPassengerRidingPosition(p_114444_).subtract(p_114444_.position());
-         LevelRenderer.renderLineBox(p_114442_, p_114443_, vec3.x - (double)f, vec3.y, vec3.z - (double)f, vec3.x + (double)f, vec3.y + 0.0625D, vec3.z + (double)f, 1.0F, 1.0F, 0.0F, 1.0F);
+         Vec3 vec3 = entity.getPassengerRidingPosition(ent).subtract(ent.position());
+         LevelRenderer.renderLineBox(poseStack, vertexConsumer, vec3.x - (double)f, vec3.y, vec3.z - (double)f, vec3.x + (double)f, vec3.y + 0.0625D, vec3.z + (double)f, 1.0F, 1.0F, 0.0F, 1.0F);
       }
 
-      Vec3 vec31 = p_114444_.getViewVector(p_114445_);
-      Matrix4f matrix4f = p_114442_.last().pose();
-      Matrix3f matrix3f = p_114442_.last().normal();
-      p_114443_.vertex(matrix4f, 0.0F, p_114444_.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal(matrix3f, (float)vec31.x, (float)vec31.y, (float)vec31.z).endVertex();
-      p_114443_.vertex(matrix4f, (float)(vec31.x * 2.0D), (float)((double)p_114444_.getEyeHeight() + vec31.y * 2.0D), (float)(vec31.z * 2.0D)).color(0, 0, 255, 255).normal(matrix3f, (float)vec31.x, (float)vec31.y, (float)vec31.z).endVertex();
+      Vec3 vec31 = ent.getViewVector(partialTick);
+      Matrix4f matrix4f = poseStack.last().pose();
+      Matrix3f matrix3f = poseStack.last().normal();
+      vertexConsumer.vertex(matrix4f, 0.0F, ent.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal(matrix3f, (float)vec31.x, (float)vec31.y, (float)vec31.z).endVertex();
+      vertexConsumer.vertex(matrix4f, (float)(vec31.x * 2.0D), (float)((double)ent.getEyeHeight() + vec31.y * 2.0D), (float)(vec31.z * 2.0D)).color(0, 0, 255, 255).normal(matrix3f, (float)vec31.x, (float)vec31.y, (float)vec31.z).endVertex();
    }
 
    private void renderFlame(PoseStack p_114454_, MultiBufferSource p_114455_, Entity p_114456_) {

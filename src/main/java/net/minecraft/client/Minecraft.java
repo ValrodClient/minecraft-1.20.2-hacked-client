@@ -1,5 +1,40 @@
 package net.minecraft.client;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.management.ManagementFactory;
+import java.net.Proxy;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.Queue;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.io.FileUtils;
+import org.joml.Matrix4f;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
+import org.slf4j.Logger;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -36,34 +71,9 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.lang.management.ManagementFactory;
-import java.net.Proxy;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import com.valrod.client.VClient;
+import com.valrod.client.ui.gui.screens.TitleScreen;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -99,7 +109,6 @@ import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -158,9 +167,6 @@ import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.client.telemetry.ClientTelemetryManager;
-import net.minecraft.client.telemetry.TelemetryProperty;
-import net.minecraft.client.telemetry.events.GameLoadTimesEvent;
 import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -246,10 +252,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.apache.commons.io.FileUtils;
-import org.joml.Matrix4f;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
-import org.slf4j.Logger;
 
 @OnlyIn(Dist.CLIENT)
 public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler {
@@ -277,7 +279,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
    private final ItemRenderer itemRenderer;
    public final ParticleEngine particleEngine;
    private final SearchRegistry searchRegistry = new SearchRegistry();
-   private final User user;
+   public User user;
    public final Font font;
    public final Font fontFilterFishy;
    public final GameRenderer gameRenderer;
@@ -326,7 +328,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
    private final PlayerSocialManager playerSocialManager;
    private final EntityModelSet entityModels;
    private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-   private final ClientTelemetryManager telemetryManager;
    private final ProfileKeyPairManager profileKeyPairManager;
    private final RealmsDataFetcher realmsDataFetcher;
    private final QuickPlayLog quickPlayLog;
@@ -449,14 +450,15 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       this.virtualScreen = new VirtualScreen(this);
       this.window = this.virtualScreen.newWindow(displaydata, this.options.fullscreenVideoModeString, this.createTitle());
       this.setWindowActive(true);
-      GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS);
 
       try {
          this.window.setIcon(this.vanillaPackResources, SharedConstants.getCurrentVersion().isStable() ? IconSet.RELEASE : IconSet.SNAPSHOT);
       } catch (IOException ioexception) {
-         LOGGER.error("Couldn't set icon", (Throwable)ioexception);
+//         LOGGER.error("Couldn't set icon", (Throwable)ioexception);
       }
 
+      VClient.onStartup();
+      
       this.window.setFramerateLimit(this.options.framerateLimit().get());
       this.mouseHandler = new MouseHandler(this);
       this.mouseHandler.setup(this.window.getWindow());
@@ -551,7 +553,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       this.window.setDefaultErrorCallback();
       this.resizeDisplay();
       this.gameRenderer.preloadUiShader(this.vanillaPackResources.asProvider());
-      this.telemetryManager = new ClientTelemetryManager(this, this.userApiService, this.user);
       this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, path);
       this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
       this.narrator = new GameNarrator(this);
@@ -563,7 +564,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       List<PackResources> list = this.resourcePackRepository.openAllSelected();
       this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
       ReloadInstance reloadinstance = this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list);
-      GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
       Minecraft.GameLoadCookie minecraft$gameloadcookie = new Minecraft.GameLoadCookie(realmsclient, p_91084_.quickPlay);
       this.setOverlay(new LoadingOverlay(this, reloadinstance, (p_296164_) -> {
          Util.ifElse(p_296164_, (p_296162_) -> {
@@ -590,9 +590,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
    private void onGameLoadFinished(@Nullable Minecraft.GameLoadCookie p_300808_) {
       Runnable runnable = this.buildInitialScreens(p_300808_);
-      GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
-      GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS);
-      GameLoadTimesEvent.INSTANCE.send(this.telemetryManager.getOutsideSessionSender());
       runnable.run();
    }
 
@@ -672,10 +669,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
    }
 
    private String createTitle() {
-      StringBuilder stringbuilder = new StringBuilder("Minecraft");
-      if (checkModStatus().shouldReportAsModified()) {
-         stringbuilder.append("*");
-      }
+      StringBuilder stringbuilder = new StringBuilder(VClient.CLIENT_NAME + " " + VClient.CLIENT_VERSION + " for Minecraft");
 
       stringbuilder.append(" ");
       stringbuilder.append(SharedConstants.getCurrentVersion().getName());
@@ -1095,7 +1089,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       }
 
       try {
-         this.telemetryManager.close();
          this.regionalCompliancies.close();
          this.modelManager.close();
          this.fontManager.close();
@@ -1988,10 +1981,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       this.continueAttack(this.screen == null && !flag2 && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
    }
 
-   public ClientTelemetryManager getTelemetryManager() {
-      return this.telemetryManager;
-   }
-
    public double getGpuUtilization() {
       return this.gpuUtilization;
    }
@@ -2551,8 +2540,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       this.gameRenderer.checkEntityPostEffect(p_91119_);
    }
 
-   public boolean shouldEntityAppearGlowing(Entity p_91315_) {
-      return p_91315_.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && p_91315_.getType() == EntityType.PLAYER;
+   public boolean shouldEntityAppearGlowing(Entity ent) {
+	   if (VClient.getModuleManager().isModuleOn("PlayerESP") && ent instanceof Player)
+		   return true;
+	   return ent.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && ent.getType() == EntityType.PLAYER;
    }
 
    protected Thread getRunningThread() {
@@ -2647,10 +2638,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       this.windowActive = p_91261_;
    }
 
-   public Component grabPanoramixScreenshot(File p_167900_, int p_167901_, int p_167902_) {
+   public Component grabPanoramixScreenshot(File output, int windowsWidth, int windowsHeight) {
       int i = this.window.getWidth();
       int j = this.window.getHeight();
-      RenderTarget rendertarget = new TextureTarget(p_167901_, p_167902_, true, ON_OSX);
+      RenderTarget rendertarget = new TextureTarget(windowsWidth, windowsHeight, true, ON_OSX);
       float f = this.player.getXRot();
       float f1 = this.player.getYRot();
       float f2 = this.player.xRotO;
@@ -2661,8 +2652,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
       try {
          this.gameRenderer.setPanoramicMode(true);
          this.levelRenderer.graphicsChanged();
-         this.window.setWidth(p_167901_);
-         this.window.setHeight(p_167902_);
+         this.window.setWidth(windowsWidth);
+         this.window.setHeight(windowsHeight);
 
          for(int k = 0; k < 6; ++k) {
             switch (k) {
@@ -2702,12 +2693,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
             } catch (InterruptedException interruptedexception) {
             }
 
-            Screenshot.grab(p_167900_, "panorama_" + k + ".png", rendertarget, (p_231415_) -> {
+            Screenshot.grab(output, "panorama_" + k + ".png", rendertarget, (p_231415_) -> {
             });
          }
 
-         Component component = Component.literal(p_167900_.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle((p_231426_) -> {
-            return p_231426_.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, p_167900_.getAbsolutePath()));
+         Component component = Component.literal(output.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle((p_231426_) -> {
+            return p_231426_.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, output.getAbsolutePath()));
          });
          return Component.translatable("screenshot.success", component);
       } catch (Exception exception) {

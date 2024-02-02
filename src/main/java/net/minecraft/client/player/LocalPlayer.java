@@ -1,12 +1,20 @@
 package net.minecraft.client.player;
 
-import com.google.common.collect.Lists;
-import com.mojang.logging.LogUtils;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
+
 import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+
+import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
+import com.valrod.client.VClient;
+import com.valrod.client.events.EventMotion;
+import com.valrod.client.events.EventUpdate;
+
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -86,7 +94,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.slf4j.Logger;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayer extends AbstractClientPlayer {
@@ -183,8 +190,12 @@ public class LocalPlayer extends AbstractClientPlayer {
    }
 
    public void tick() {
+	   EventUpdate event = new EventUpdate();
+       VClient.getModuleManager().onEvent(event);
+       
       if (this.level().hasChunkAt(this.getBlockX(), this.getBlockZ())) {
          super.tick();
+         
          if (this.isPassenger()) {
             this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround()));
             this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
@@ -224,41 +235,51 @@ public class LocalPlayer extends AbstractClientPlayer {
       }
 
       if (this.isControlledCamera()) {
-         double d4 = this.getX() - this.xLast;
-         double d0 = this.getY() - this.yLast1;
-         double d1 = this.getZ() - this.zLast;
-         double d2 = (double)(this.getYRot() - this.yRotLast);
-         double d3 = (double)(this.getXRot() - this.xRotLast);
+    	  EventMotion event = new EventMotion(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot(), this.yRotLast, this.xRotLast, this.onGround);
+          VClient.getModuleManager().onEvent(event);
+    	  
+         double diffX = event.getX() - event.getPrevX();
+		 double diffY = event.getY() - event.getPrevY();
+         double diffZ = event.getZ() - event.getPrevZ();
+         double diffYaw = (double)(event.getYRot() - event.getPrevYRot());
+         double diffPitch = (double)(event.getXRot() - event.getPrevXRot());
          ++this.positionReminder;
-         boolean flag1 = Mth.lengthSquared(d4, d0, d1) > Mth.square(2.0E-4D) || this.positionReminder >= 20;
-         boolean flag2 = d2 != 0.0D || d3 != 0.0D;
+         boolean shouldUpdatePos = Mth.lengthSquared(diffX, diffY, diffZ) > Mth.square(2.0E-4D) || this.positionReminder >= 20;
+         boolean shouldUpdateLook = diffYaw != 0.0D || diffPitch != 0.0D;
+         
          if (this.isPassenger()) {
             Vec3 vec3 = this.getDeltaMovement();
             this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0D, vec3.z, this.getYRot(), this.getXRot(), this.onGround()));
-            flag1 = false;
-         } else if (flag1 && flag2) {
-            this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot(), this.onGround()));
-         } else if (flag1) {
-            this.connection.send(new ServerboundMovePlayerPacket.Pos(this.getX(), this.getY(), this.getZ(), this.onGround()));
-         } else if (flag2) {
-            this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround()));
-         } else if (this.lastOnGround != this.onGround()) {
-            this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(this.onGround()));
+            shouldUpdatePos = false;
+         } else if (shouldUpdatePos && shouldUpdateLook) {
+            this.connection.send(new ServerboundMovePlayerPacket.PosRot(event.getX(), event.getY(), event.getZ(), event.getYRot(), event.getXRot(), event.onGround()));
+         } else if (shouldUpdatePos) {
+            this.connection.send(new ServerboundMovePlayerPacket.Pos(event.getX(), event.getY(), event.getZ(), event.onGround()));
+         } else if (shouldUpdateLook) {
+            this.connection.send(new ServerboundMovePlayerPacket.Rot(event.getYRot(), event.getXRot(), event.onGround()));
+         } else if (event.isPrevOnGround() != event.onGround()) {
+            this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(event.onGround()));
          }
 
-         if (flag1) {
+         if (shouldUpdatePos) {
             this.xLast = this.getX();
             this.yLast1 = this.getY();
             this.zLast = this.getZ();
+            event.setPrevX(event.getX());
+            event.setPrevY(event.getY());
+            event.setPrevZ(event.getZ());
             this.positionReminder = 0;
          }
 
-         if (flag2) {
+         if (shouldUpdateLook) {
             this.yRotLast = this.getYRot();
             this.xRotLast = this.getXRot();
+            event.setPrevYRot(event.getYRot());
+            event.setPrevXRot(event.getXRot());
          }
 
-         this.lastOnGround = this.onGround();
+//         this.lastOnGround = this.onGround();
+         event.setPrevOnGround(event.onGround());
          this.autoJumpEnabled = this.minecraft.options.autoJump().get();
       }
 

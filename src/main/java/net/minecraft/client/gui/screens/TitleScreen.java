@@ -69,14 +69,14 @@ public class TitleScreen extends Screen {
       this(false);
    }
 
-   public TitleScreen(boolean p_96733_) {
-      this(p_96733_, (LogoRenderer)null);
+   public TitleScreen(boolean fading) {
+      this(fading, (LogoRenderer)null);
    }
 
-   public TitleScreen(boolean p_265779_, @Nullable LogoRenderer p_265067_) {
+   public TitleScreen(boolean fading, @Nullable LogoRenderer logoRenderer) {
       super(Component.translatable("narrator.screen.title"));
-      this.fading = p_265779_;
-      this.logoRenderer = Objects.requireNonNullElseGet(p_265067_, () -> {
+      this.fading = fading;
+      this.logoRenderer = Objects.requireNonNullElseGet(logoRenderer, () -> {
          return new LogoRenderer(false);
       });
    }
@@ -229,27 +229,27 @@ public class TitleScreen extends Screen {
       this.minecraft.setScreen(new RealmsMainScreen(this));
    }
 
-   public void render(GuiGraphics p_282860_, int p_281753_, int p_283539_, float p_282628_) {
+   public void render(GuiGraphics g, int mouseX, int mouseY, float pt) {
       if (this.fadeInStart == 0L && this.fading) {
          this.fadeInStart = Util.getMillis();
       }
 
       float f = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
-      this.panorama.render(p_282628_, Mth.clamp(f, 0.0F, 1.0F));
+      this.panorama.render(pt, Mth.clamp(f, 0.0F, 1.0F));
       RenderSystem.enableBlend();
-      p_282860_.setColor(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(f, 0.0F, 1.0F)) : 1.0F);
-      p_282860_.blit(PANORAMA_OVERLAY, 0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
-      p_282860_.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+      g.setColor(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(f, 0.0F, 1.0F)) : 1.0F);
+      g.blit(PANORAMA_OVERLAY, 0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
+      g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
       float f1 = this.fading ? Mth.clamp(f - 1.0F, 0.0F, 1.0F) : 1.0F;
-      this.logoRenderer.renderLogo(p_282860_, this.width, f1);
+      this.logoRenderer.renderLogo(g, this.width, f1);
       int i = Mth.ceil(f1 * 255.0F) << 24;
       if ((i & -67108864) != 0) {
          if (this.warningLabel != null) {
-            this.warningLabel.render(p_282860_, i);
+            this.warningLabel.render(g, i);
          }
 
          if (this.splash != null) {
-            this.splash.render(p_282860_, this.width, this.font, i);
+            this.splash.render(g, this.width, this.font, i);
          }
 
          String s = "Minecraft " + SharedConstants.getCurrentVersion().getName();
@@ -263,7 +263,7 @@ public class TitleScreen extends Screen {
             s = s + I18n.get("menu.modded");
          }
 
-         p_282860_.drawString(this.font, s, 2, this.height - 10, 16777215 | i);
+         g.drawString(this.font, s, 2, this.height - 10, 16777215 | i);
 
          for(GuiEventListener guieventlistener : this.children()) {
             if (guieventlistener instanceof AbstractWidget) {
@@ -271,10 +271,10 @@ public class TitleScreen extends Screen {
             }
          }
 
-         super.render(p_282860_, p_281753_, p_283539_, p_282628_);
+         super.render(g, mouseX, mouseY, pt);
          if (this.realmsNotificationsEnabled() && f1 >= 1.0F) {
             RenderSystem.enableDepthTest();
-            this.realmsNotificationsScreen.render(p_282860_, p_281753_, p_283539_, p_282628_);
+            this.realmsNotificationsScreen.render(g, mouseX, mouseY, pt);
          }
 
       }

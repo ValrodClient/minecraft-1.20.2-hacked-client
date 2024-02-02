@@ -1,5 +1,24 @@
 package net.minecraft.client.renderer;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonSyntaxException;
@@ -16,18 +35,10 @@ import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import com.valrod.client.VClient;
+import com.valrod.client.events.EventRender2D;
+import com.valrod.client.events.EventRender3D;
+
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -77,10 +88,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.slf4j.Logger;
 
 @OnlyIn(Dist.CLIENT)
 public class GameRenderer implements AutoCloseable {
@@ -877,7 +884,7 @@ public class GameRenderer implements AutoCloseable {
       return !mobeffectinstance.endsWithin(200) ? 1.0F : 0.7F + Mth.sin(((float)mobeffectinstance.getDuration() - p_109110_) * (float)Math.PI * 0.2F) * 0.3F;
    }
 
-   public void render(float p_109094_, long p_109095_, boolean p_109096_) {
+   public void render(float partialTick, long p_109095_, boolean p_109096_) {
       if (!this.minecraft.isWindowActive() && this.minecraft.options.pauseOnLostFocus && (!this.minecraft.options.touchscreen().get() || !this.minecraft.mouseHandler.isRightPressed())) {
          if (Util.getMillis() - this.lastActiveTime > 500L) {
             this.minecraft.pauseGame(false);
@@ -893,14 +900,14 @@ public class GameRenderer implements AutoCloseable {
          RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
          if (flag && p_109096_ && this.minecraft.level != null) {
             this.minecraft.getProfiler().push("level");
-            this.renderLevel(p_109094_, p_109095_, new PoseStack());
+            this.renderLevel(partialTick, p_109095_, new PoseStack());
             this.tryTakeScreenshotIfNeeded();
             this.minecraft.levelRenderer.doEntityOutline();
             if (this.postEffect != null && this.effectActive) {
                RenderSystem.disableBlend();
                RenderSystem.disableDepthTest();
                RenderSystem.resetTextureMatrix();
-               this.postEffect.process(p_109094_);
+               this.postEffect.process(partialTick);
             }
 
             this.minecraft.getMainRenderTarget().bindWrite(true);
@@ -920,7 +927,7 @@ public class GameRenderer implements AutoCloseable {
          if (flag && p_109096_ && this.minecraft.level != null) {
             this.minecraft.getProfiler().popPush("gui");
             if (this.minecraft.player != null) {
-               float f = Mth.lerp(p_109094_, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
+               float f = Mth.lerp(partialTick, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
                float f1 = this.minecraft.options.screenEffectScale().get().floatValue();
                if (f > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && f1 < 1.0F) {
                   this.renderConfusionOverlay(guigraphics, f * (1.0F - f1));
@@ -928,8 +935,9 @@ public class GameRenderer implements AutoCloseable {
             }
 
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
-               this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), p_109094_);
-               this.minecraft.gui.render(guigraphics, p_109094_);
+               this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), partialTick);
+               this.minecraft.gui.render(guigraphics, partialTick);
+               VClient.getModuleManager().onEvent(new EventRender2D(guigraphics, partialTick));
                RenderSystem.clear(256, Minecraft.ON_OSX);
             }
 
@@ -1067,7 +1075,7 @@ public class GameRenderer implements AutoCloseable {
       }
    }
 
-   public void renderLevel(float p_109090_, long p_109091_, PoseStack p_109092_) {
+   public void renderLevel(float p_109090_, long p_109091_, PoseStack poseStack) {
       this.lightTexture.updateLightTexture(p_109090_);
       if (this.minecraft.getCameraEntity() == null) {
          this.minecraft.setCameraEntity(this.minecraft.player);
@@ -1103,16 +1111,17 @@ public class GameRenderer implements AutoCloseable {
       Matrix4f matrix4f = posestack.last().pose();
       this.resetProjectionMatrix(matrix4f);
       camera.setup(this.minecraft.level, (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity()), !this.minecraft.options.getCameraType().isFirstPerson(), this.minecraft.options.getCameraType().isMirrored(), p_109090_);
-      p_109092_.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-      p_109092_.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
-      Matrix3f matrix3f = (new Matrix3f(p_109092_.last().normal())).invert();
+      poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+      poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+      Matrix3f matrix3f = (new Matrix3f(poseStack.last().normal())).invert();
       RenderSystem.setInverseViewRotationMatrix(matrix3f);
-      this.minecraft.levelRenderer.prepareCullFrustum(p_109092_, camera.getPosition(), this.getProjectionMatrix(Math.max(d0, (double)this.minecraft.options.fov().get().intValue())));
-      this.minecraft.levelRenderer.renderLevel(p_109092_, p_109090_, p_109091_, flag, camera, this, this.lightTexture, matrix4f);
+      this.minecraft.levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d0, (double)this.minecraft.options.fov().get().intValue())));
+      this.minecraft.levelRenderer.renderLevel(poseStack, p_109090_, p_109091_, flag, camera, this, this.lightTexture, matrix4f);
       this.minecraft.getProfiler().popPush("hand");
       if (this.renderHand) {
          RenderSystem.clear(256, Minecraft.ON_OSX);
-         this.renderItemInHand(p_109092_, camera, p_109090_);
+         this.renderItemInHand(poseStack, camera, p_109090_);
+         VClient.getModuleManager().onEvent(new EventRender3D());
       }
 
       this.minecraft.getProfiler().pop();

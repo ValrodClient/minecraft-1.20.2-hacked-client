@@ -28,8 +28,8 @@ public interface EntityGetter {
 
    List<? extends Player> players();
 
-   default List<Entity> getEntities(@Nullable Entity p_45934_, AABB p_45935_) {
-      return this.getEntities(p_45934_, p_45935_, EntitySelector.NO_SPECTATORS);
+   default List<Entity> getEntities(@Nullable Entity ent, AABB hitbox) {
+      return this.getEntities(ent, hitbox, EntitySelector.NO_SPECTATORS);
    }
 
    default boolean isUnobstructed(@Nullable Entity p_45939_, VoxelShape p_45940_) {
