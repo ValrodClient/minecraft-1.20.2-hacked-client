@@ -2541,9 +2541,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
    }
 
    public boolean shouldEntityAppearGlowing(Entity ent) {
-	   if (VClient.getModuleManager().isModuleOn("PlayerESP") && ent instanceof Player)
-		   return true;
-	   return ent.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && ent.getType() == EntityType.PLAYER;
+	   return ent.isCurrentlyGlowing() || this.player != null && ((this.player.isSpectator() && this.options.keySpectatorOutlines.isDown()) || VClient.getModuleManager().isModuleOn("PlayerESP")) && ent.getType() == EntityType.PLAYER;
    }
 
    protected Thread getRunningThread() {
