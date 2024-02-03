@@ -32,41 +32,59 @@ public class CustomPlayerSkinWidget extends AbstractWidget {
 	private static final float MODEL_OFFSET = 0.0625F;
 	private static final float MODEL_HEIGHT = 2.125F;
 	private static final float Z_OFFSET = 100.0F;
-	private static final float ROTATION_SENSITIVITY = 2.5F;
-	private static final float DEFAULT_ROTATION_X = -5.0F;
-	private static final float DEFAULT_ROTATION_Y = 30.0F;
-	private static final float ROTATION_X_LIMIT = 50.0F;
 	private final CustomPlayerSkinWidget.Model model;
 	private PlayerSkin skin;
 	private UUID uuid;
-	private float rotationX = -5.0F;
-	private float rotationY = 30.0F;
+	private float rotationX = -8.0F;
+	private float rotationY;
 	private int tick = 0;
-	
-	public CustomPlayerSkinWidget(int p_299990_, int p_297411_, EntityModelSet model) {
-		super(0, 0, p_299990_, p_297411_, CommonComponents.EMPTY);
+	private long lastSkinChange;
+
+	public CustomPlayerSkinWidget(int x, int y, int height, EntityModelSet model) {
+		super(x, y, 0, height, CommonComponents.EMPTY);
 		this.model = CustomPlayerSkinWidget.Model.bake(model);
+		this.lastSkinChange = 0;
 		updateSkin();
 	}
-	
-	
+
+
 	private void updateSkin() {
 		Minecraft minecraft = Minecraft.getInstance();
 		UUID playerID = minecraft.user.getProfileId();
 		ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(playerID, false);
 		PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(playerID);
+
+		if(this.uuid != playerID) {
+			this.lastSkinChange = System.currentTimeMillis();
+			this.tick = -20;
+		}
 		
 		this.uuid = playerID;
 		this.skin = playerskin;
 	}
 	
+	private float maxRotationAngle() {
+		float maxAnimationRot = 2000;
+		int animationDurationMillis = 200;
+		double animationProgress = 1;
+		
+		double a = animationDurationMillis - (System.currentTimeMillis() - this.lastSkinChange);
+		animationProgress = 1 - (a / animationDurationMillis);
+		
+		if (animationProgress > 1)
+			animationProgress = 1;
+		
+		float normalMaxRotation = 30F;
+		
+		float rotation = (float) (((maxAnimationRot - normalMaxRotation) * (1 - animationProgress)) + normalMaxRotation);
+		return rotation;
+	}
+
 	protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
 		updateSkin();
-		
-		this.rotationX = -10;
-		float rot = (float) Math.sin(++this.tick / 80F) * 30;
-		this.rotationY =  rot;
-		
+
+		this.rotationY =  (float) Math.sin(++this.tick / 80F) * maxRotationAngle();
+
 		g.pose().pushPose();
 		g.pose().translate((float)this.getX() + (float)this.getWidth() / 2.0F, (float)(this.getY() + this.getHeight()), 100.0F);
 		float scale = (float)this.getHeight() / 2.125F;
@@ -115,6 +133,6 @@ public class CustomPlayerSkinWidget extends AbstractWidget {
 
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
-		
+
 	}
 }

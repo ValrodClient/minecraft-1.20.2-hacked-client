@@ -43,7 +43,14 @@ public class AltManager extends Screen {
 		super.init();
 		int l = this.height / 4;
 		int xCenter = this.width / 2;
-
+//		int yCenter = this.height / 2;
+		
+//		int panelWidth = 300;
+//		int panelHeight = 500;
+//		
+//		int xPos = xCenter - (panelWidth / 2);
+//		int yPos = yCenter - (panelHeight / 2);
+		
 		// Username text field
 		this.usernameEditBox = new EditBox(font, xCenter - 75, l, 150, 20, Component.literal("username"));
 		this.usernameEditBox.setMaxLength(64);
@@ -62,7 +69,7 @@ public class AltManager extends Screen {
 		this.addRenderableWidget(this.passwordEditBox);
 
 		// Player skin widget
-		CustomPlayerSkinWidget playerSkinWidget = new CustomPlayerSkinWidget(xCenter, this.height/2, this.minecraft.getEntityModels());
+		CustomPlayerSkinWidget playerSkinWidget = new CustomPlayerSkinWidget(xCenter - 140, l - 50, 150, this.minecraft.getEntityModels());
 		this.addRenderableWidget(playerSkinWidget);
 
 		// Previous button
