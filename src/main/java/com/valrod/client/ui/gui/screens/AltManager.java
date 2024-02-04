@@ -75,12 +75,12 @@ public class AltManager extends Screen {
 		// Previous button
 		this.addRenderableWidget(Button.builder(Component.literal("Back"), (p_280838_) -> {
 			this.minecraft.setScreen(this.previousScreen);
-		}).bounds(this.width / 2 - 100, l + 72 + 12, 98, 20).build());
+		}).bounds(this.width / 2 - 100, l + 72 + 24, 98, 20).build());
 
 		// Login button
 		this.addRenderableWidget(Button.builder(Component.literal("login"), (p_280831_) -> {
 			login();
-		}).bounds(this.width / 2 + 2, l + 72 + 12, 98, 20).build());
+		}).bounds(this.width / 2 + 2, l + 72 + 24, 98, 20).build());
 
 	}
 
@@ -95,7 +95,7 @@ public class AltManager extends Screen {
 	public void render(GuiGraphics g, int mouseX, int mouseY, float pt) {
 		super.render(g, mouseX, mouseY, pt);
 
-		g.drawCenteredString(this.font, AltManager.status, g.guiWidth()/2, g.guiHeight()/8, 16777215);
+		g.drawCenteredString(this.font, AltManager.status, g.guiWidth()/2, g.guiHeight()/6, 16777215);
 	}
 
 	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
