@@ -88,8 +88,8 @@ public class ReportReasonSelectionScreen extends Screen {
 
    }
 
-   public void renderBackground(GuiGraphics p_298834_, int p_299010_, int p_300733_, float p_298483_) {
-      this.renderDirtBackground(p_298834_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    private int buttonTop() {

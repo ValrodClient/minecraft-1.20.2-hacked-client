@@ -68,8 +68,8 @@ public class LanguageSelectScreen extends OptionsSubScreen {
       p_283397_.drawCenteredString(this.font, WARNING_LABEL, this.width / 2, this.height - 56, -8355712);
    }
 
-   public void renderBackground(GuiGraphics p_299747_, int p_298705_, int p_297473_, float p_297920_) {
-      this.renderDirtBackground(p_299747_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    @OnlyIn(Dist.CLIENT)

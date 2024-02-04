@@ -85,7 +85,7 @@ public class KeyBindsScreen extends OptionsSubScreen {
       this.resetButton.active = flag;
    }
 
-   public void renderBackground(GuiGraphics p_297309_, int p_299178_, int p_298961_, float p_298519_) {
-      this.renderDirtBackground(p_297309_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 }

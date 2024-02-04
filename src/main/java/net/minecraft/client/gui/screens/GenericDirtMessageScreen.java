@@ -20,7 +20,8 @@ public class GenericDirtMessageScreen extends Screen {
       p_281274_.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);
    }
 
-   public void renderBackground(GuiGraphics p_299347_, int p_301174_, int p_298979_, float p_300319_) {
-      this.renderDirtBackground(p_299347_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+//      this.renderDirtBackground(g);
+      super.renderBackground(g, mouseX, mouseY, pt);
    }
 }

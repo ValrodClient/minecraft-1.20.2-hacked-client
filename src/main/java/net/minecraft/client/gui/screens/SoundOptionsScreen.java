@@ -51,7 +51,7 @@ public class SoundOptionsScreen extends OptionsSubScreen {
       this.basicListRender(p_281823_, this.list, p_282932_, p_281927_, p_281292_);
    }
 
-   public void renderBackground(GuiGraphics p_298957_, int p_300979_, int p_299818_, float p_299553_) {
-      this.renderDirtBackground(p_298957_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 }

@@ -73,8 +73,8 @@ public class CreateBuffetWorldScreen extends Screen {
       p_281766_.drawCenteredString(this.font, BIOME_SELECT_INFO, this.width / 2, 28, 10526880);
    }
 
-   public void renderBackground(GuiGraphics p_297435_, int p_300684_, int p_299984_, float p_301173_) {
-      this.renderDirtBackground(p_297435_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    @OnlyIn(Dist.CLIENT)

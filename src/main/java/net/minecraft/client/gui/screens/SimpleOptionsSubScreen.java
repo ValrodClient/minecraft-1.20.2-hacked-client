@@ -47,8 +47,8 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
       this.basicListRender(p_283632_, this.list, p_283304_, p_283302_, p_282245_);
    }
 
-   public void renderBackground(GuiGraphics p_300862_, int p_299548_, int p_298100_, float p_298488_) {
-      this.renderDirtBackground(p_300862_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    public void updateNarratorButton() {

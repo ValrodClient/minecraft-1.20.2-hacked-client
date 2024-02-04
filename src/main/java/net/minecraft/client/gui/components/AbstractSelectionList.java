@@ -1,13 +1,17 @@
 package net.minecraft.client.gui.components;
 
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
+import java.awt.Color;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -18,7 +22,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -178,28 +181,31 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
    protected void renderDecorations(GuiGraphics p_281477_, int p_93459_, int p_93460_) {
    }
 
-   public void render(GuiGraphics p_282708_, int p_283242_, int p_282891_, float p_283683_) {
+   public void render(GuiGraphics g, int p_283242_, int p_282891_, float p_283683_) {
       this.hovered = this.isMouseOver((double)p_283242_, (double)p_282891_) ? this.getEntryAtPosition((double)p_283242_, (double)p_282891_) : null;
       if (this.renderBackground) {
-         p_282708_.setColor(0.125F, 0.125F, 0.125F, 1.0F);
-         int i = 32;
-         p_282708_.blit(Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
-         p_282708_.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-      }
+//         g.setColor(0.125F, 0.125F, 0.125F, 1.0F);
+//         int i = 32;
+//         g.blit(Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
+//         g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    	   g.fill(this.x0, this.y0, this.x1, this.y1 + (int)this.getScrollAmount(), 503316480);     
+    	  }
 
-      this.enableScissor(p_282708_);
+      this.enableScissor(g);
       if (this.renderHeader) {
          int i1 = this.getRowLeft();
          int j = this.y0 + 4 - (int)this.getScrollAmount();
-         this.renderHeader(p_282708_, i1, j);
+         this.renderHeader(g, i1, j);
       }
 
-      this.renderList(p_282708_, p_283242_, p_282891_, p_283683_);
-      p_282708_.disableScissor();
+      this.renderList(g, p_283242_, p_282891_, p_283683_);
+      g.disableScissor();
       if (this.renderBackground) {
          int j1 = 4;
-         p_282708_.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
-         p_282708_.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
+//         g.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
+//         g.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
+         g.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, 1509949440, 0, 0);
+         g.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, 1509949440, 0);
       }
 
       int k1 = this.getMaxScroll();
@@ -212,11 +218,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
             l = this.y0;
          }
 
-         p_282708_.fill(l1, this.y0, l1 + 6, this.y1, -16777216);
-         p_282708_.blitSprite(SCROLLER_SPRITE, l1, l, 6, k);
+         g.fill(l1, this.y0, l1 + 6, this.y1, -16777216);
+         g.blitSprite(SCROLLER_SPRITE, l1, l, 6, k);
       }
 
-      this.renderDecorations(p_282708_, p_283242_, p_282891_);
+      this.renderDecorations(g, p_283242_, p_282891_);
       RenderSystem.disableBlend();
    }
 

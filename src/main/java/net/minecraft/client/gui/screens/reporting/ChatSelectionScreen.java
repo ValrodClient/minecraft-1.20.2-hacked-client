@@ -105,8 +105,8 @@ public class ChatSelectionScreen extends Screen {
       this.contextInfoLabel.renderCentered(p_282899_, this.width / 2, this.chatSelectionList.getFooterTop());
    }
 
-   public void renderBackground(GuiGraphics p_298958_, int p_300571_, int p_300650_, float p_300786_) {
-      this.renderDirtBackground(p_298958_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    public void onClose() {

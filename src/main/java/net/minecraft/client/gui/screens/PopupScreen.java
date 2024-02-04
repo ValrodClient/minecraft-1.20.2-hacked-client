@@ -61,8 +61,8 @@ public class PopupScreen extends Screen {
       this.messageLines.renderCentered(p_283167_, this.width / 2, this.contentTop);
    }
 
-   public void renderBackground(GuiGraphics p_298251_, int p_300660_, int p_298593_, float p_298936_) {
-      this.renderDirtBackground(p_298251_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    public boolean shouldCloseOnEsc() {

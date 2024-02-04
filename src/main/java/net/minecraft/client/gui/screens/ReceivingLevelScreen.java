@@ -32,8 +32,8 @@ public class ReceivingLevelScreen extends Screen {
       p_281489_.drawCenteredString(this.font, DOWNLOADING_TERRAIN_TEXT, this.width / 2, this.height / 2 - 50, 16777215);
    }
 
-   public void renderBackground(GuiGraphics p_298240_, int p_297552_, int p_298125_, float p_297335_) {
-      this.renderDirtBackground(p_298240_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    public void tick() {

@@ -114,8 +114,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
    }
 
-   public void renderBackground(GuiGraphics p_299638_, int p_297645_, int p_299202_, float p_301378_) {
-      this.renderDirtBackground(p_299638_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    public void onStatsUpdated() {

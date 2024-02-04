@@ -160,7 +160,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
       this.basicListRender(p_282311_, this.list, p_283219_, p_282352_, p_283266_);
    }
 
-   public void renderBackground(GuiGraphics p_299806_, int p_297567_, int p_299526_, float p_298680_) {
-      this.renderDirtBackground(p_299806_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 }

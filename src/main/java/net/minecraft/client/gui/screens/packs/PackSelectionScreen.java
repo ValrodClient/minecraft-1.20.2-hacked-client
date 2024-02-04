@@ -173,8 +173,8 @@ public class PackSelectionScreen extends Screen {
       p_281318_.drawCenteredString(this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
    }
 
-   public void renderBackground(GuiGraphics p_299682_, int p_301154_, int p_300727_, float p_298616_) {
-      this.renderDirtBackground(p_299682_);
+   public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
+	   super.renderBackground(g, mouseX, mouseY, pt);
    }
 
    protected static void copyPacks(Minecraft p_100000_, List<Path> p_100001_, Path p_100002_) {
