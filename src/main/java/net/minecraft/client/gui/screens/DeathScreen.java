@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.valrod.client.ui.gui.screens.TitleScreen;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.util.List;

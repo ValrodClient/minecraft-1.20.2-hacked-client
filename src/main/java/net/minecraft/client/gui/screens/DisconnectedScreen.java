@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.valrod.client.ui.gui.screens.TitleScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;

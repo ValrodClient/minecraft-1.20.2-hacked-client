@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.net.URI;
@@ -42,12 +43,15 @@ import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.CubeMap;
+import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
@@ -351,11 +355,15 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	public void added() {
 	}
 
-	public void renderBackground(GuiGraphics g, int p_299421_, int p_298679_, float p_297268_) {
+	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
+	private final PanoramaRenderer panorama = new PanoramaRenderer(CUBE_MAP);
+
+	public void renderBackground(GuiGraphics g, int p_299421_, int p_298679_, float pt) {
 		if (this.minecraft != null && this.minecraft.level != null) {
-		    this.renderTransparentBackground(g);
+			this.renderTransparentBackground(g);
 		} else {
-		    this.renderDirtBackground(g);
+			this.panorama.render(pt, 1F);
+			//this.renderDirtBackground(g);
 		}
 	}
 

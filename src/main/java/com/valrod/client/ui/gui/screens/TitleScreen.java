@@ -1,6 +1,8 @@
 package com.valrod.client.ui.gui.screens;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 
@@ -8,15 +10,13 @@ import com.mojang.authlib.minecraft.BanDetails;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.LogoRenderer;
-import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 
 public class TitleScreen extends Screen {
@@ -44,23 +44,23 @@ public class TitleScreen extends Screen {
 		super.init();
 		int yPos = this.height / 4 + 48;
 		int xCenter = this.width / 2;
-		
+
 		this.addRenderableWidget(Button.builder(Component.translatable("menu.options"), (callback) -> {
 			this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
 		}).bounds(xCenter - 100, yPos + 72 + 12, 98, 20).build());
-		
+
 		this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"), (callback) -> {
 			this.minecraft.stop();
 		}).bounds(xCenter + 2, yPos + 72 + 12, 98, 20).build());
-		
+
 		this.addRenderableWidget(Button.builder(Component.translatable("menu.singleplayer"), (callback) -> {
 			this.minecraft.setScreen(new SelectWorldScreen(this));
 		}).bounds(xCenter - 100, yPos, 200, 20).build());
-		
+
 		this.addRenderableWidget(Button.builder(Component.literal("Alt Manager"), (callback) -> {
 			this.minecraft.setScreen(new AltManager(this));
 		}).bounds(xCenter - 100, yPos + 24 * 2, 200, 20).build());
-		
+
 		Component component = this.getMultiplayerDisabledReason();
 		boolean flag = component == null;
 		Tooltip tooltip = component != null ? Tooltip.create(component) : null;
@@ -88,7 +88,7 @@ public class TitleScreen extends Screen {
 	public void render(GuiGraphics g, int mouseX, int mouseY, float pt) {
 		super.render(g, mouseX, mouseY, pt);
 
-//		g.drawCenteredString(this.font, this.title, mouseX, mouseY, 16777215);
+		//		g.drawCenteredString(this.font, this.title, mouseX, mouseY, 16777215);
 	}
 
 	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
@@ -97,6 +97,10 @@ public class TitleScreen extends Screen {
 
 	public void onClose() {
 
+	}
+
+	public static CompletableFuture<Void> preloadResources(TextureManager tm, Executor ex) {
+		return CompletableFuture.allOf(tm.preload(LogoRenderer.MINECRAFT_LOGO, ex), tm.preload(LogoRenderer.MINECRAFT_EDITION, ex));
 	}
 
 }

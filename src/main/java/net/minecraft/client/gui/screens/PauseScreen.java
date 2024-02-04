@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.valrod.client.ui.gui.screens.TitleScreen;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
