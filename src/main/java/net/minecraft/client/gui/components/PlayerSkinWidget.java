@@ -35,10 +35,10 @@ public class PlayerSkinWidget extends AbstractWidget {
    private float rotationX = -5.0F;
    private float rotationY = 30.0F;
 
-   public PlayerSkinWidget(int p_299990_, int p_297411_, EntityModelSet p_298438_, Supplier<PlayerSkin> p_299497_) {
+   public PlayerSkinWidget(int p_299990_, int p_297411_, EntityModelSet model, Supplier<PlayerSkin> skin) {
       super(0, 0, p_299990_, p_297411_, CommonComponents.EMPTY);
-      this.model = PlayerSkinWidget.Model.bake(p_298438_);
-      this.skin = p_299497_;
+      this.model = PlayerSkinWidget.Model.bake(model);
+      this.skin = skin;
    }
 
    protected void renderWidget(GuiGraphics p_298610_, int p_299860_, int p_299420_, float p_300463_) {

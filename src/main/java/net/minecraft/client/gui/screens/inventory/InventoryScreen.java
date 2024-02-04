@@ -81,42 +81,42 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
       this.yMouse = (float)p_98877_;
    }
 
-   protected void renderBg(GuiGraphics p_281500_, float p_281299_, int p_283481_, int p_281831_) {
+   protected void renderBg(GuiGraphics g, float p_281299_, int p_283481_, int p_281831_) {
       int i = this.leftPos;
       int j = this.topPos;
-      p_281500_.blit(INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
-      renderEntityInInventoryFollowsMouse(p_281500_, i + 26, j + 8, i + 75, j + 78, 30, 0.0625F, this.xMouse, this.yMouse, this.minecraft.player);
+      g.blit(INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
+      renderEntityInInventoryFollowsMouse(g, i + 26, j + 8, i + 75, j + 78, 30, 0.0625F, this.xMouse, this.yMouse, this.minecraft.player);
    }
 
-   public static void renderEntityInInventoryFollowsMouse(GuiGraphics p_282802_, int p_275688_, int p_275245_, int p_275535_, int p_301381_, int p_299741_, float p_275604_, float p_275546_, float p_300682_, LivingEntity p_275689_) {
+   public static void renderEntityInInventoryFollowsMouse(GuiGraphics g, int p_275688_, int p_275245_, int p_275535_, int p_301381_, int p_299741_, float size, float yaw, float pitch, LivingEntity ent) {
       float f = (float)(p_275688_ + p_275535_) / 2.0F;
       float f1 = (float)(p_275245_ + p_301381_) / 2.0F;
-      p_282802_.enableScissor(p_275688_, p_275245_, p_275535_, p_301381_);
-      float f2 = (float)Math.atan((double)((f - p_275546_) / 40.0F));
-      float f3 = (float)Math.atan((double)((f1 - p_300682_) / 40.0F));
+      g.enableScissor(p_275688_, p_275245_, p_275535_, p_301381_);
+      float f2 = (float)Math.atan((double)((f - yaw) / 40.0F));
+      float f3 = (float)Math.atan((double)((f1 - pitch) / 40.0F));
       Quaternionf quaternionf = (new Quaternionf()).rotateZ((float)Math.PI);
       Quaternionf quaternionf1 = (new Quaternionf()).rotateX(f3 * 20.0F * ((float)Math.PI / 180F));
       quaternionf.mul(quaternionf1);
-      float f4 = p_275689_.yBodyRot;
-      float f5 = p_275689_.getYRot();
-      float f6 = p_275689_.getXRot();
-      float f7 = p_275689_.yHeadRotO;
-      float f8 = p_275689_.yHeadRot;
-      p_275689_.yBodyRot = 180.0F + f2 * 20.0F;
-      p_275689_.setYRot(180.0F + f2 * 40.0F);
-      p_275689_.setXRot(-f3 * 20.0F);
-      p_275689_.yHeadRot = p_275689_.getYRot();
-      p_275689_.yHeadRotO = p_275689_.getYRot();
-      Vector3f vector3f = new Vector3f(0.0F, p_275689_.getBbHeight() / 2.0F + p_275604_, 0.0F);
-      renderEntityInInventory(p_282802_, f, f1, p_299741_, vector3f, quaternionf, quaternionf1, p_275689_);
-      p_275689_.yBodyRot = f4;
-      p_275689_.setYRot(f5);
-      p_275689_.setXRot(f6);
-      p_275689_.yHeadRotO = f7;
-      p_275689_.yHeadRot = f8;
-      p_282802_.disableScissor();
+      float f4 = ent.yBodyRot;
+      float f5 = ent.getYRot();
+      float f6 = ent.getXRot();
+      float f7 = ent.yHeadRotO;
+      float f8 = ent.yHeadRot;
+      ent.yBodyRot = 180.0F + f2 * 20.0F;
+      ent.setYRot(180.0F + f2 * 40.0F);
+      ent.setXRot(-f3 * 20.0F);
+      ent.yHeadRot = ent.getYRot();
+      ent.yHeadRotO = ent.getYRot();
+      Vector3f vector3f = new Vector3f(0.0F, ent.getBbHeight() / 2.0F + size, 0.0F);
+      renderEntityInInventory(g, f, f1, p_299741_, vector3f, quaternionf, quaternionf1, ent);
+      ent.yBodyRot = f4;
+      ent.setYRot(f5);
+      ent.setXRot(f6);
+      ent.yHeadRotO = f7;
+      ent.yHeadRot = f8;
+      g.disableScissor();
    }
-
+   
    public static void renderEntityInInventory(GuiGraphics p_282665_, float p_300023_, float p_301239_, int p_283622_, Vector3f p_298037_, Quaternionf p_281880_, @Nullable Quaternionf p_282882_, LivingEntity p_282466_) {
       p_282665_.pose().pushPose();
       p_282665_.pose().translate((double)p_300023_, (double)p_301239_, 50.0D);

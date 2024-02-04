@@ -43,10 +43,10 @@ public class RealmsUtil {
       return convertToAgePresentation(System.currentTimeMillis() - p_287698_.getTime());
    }
 
-   public static void renderPlayerFace(GuiGraphics p_281255_, int p_281818_, int p_281791_, int p_282088_, UUID p_298294_) {
+   public static void renderPlayerFace(GuiGraphics p_281255_, int p_281818_, int p_281791_, int p_282088_, UUID uuid) {
       Minecraft minecraft = Minecraft.getInstance();
-      ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(p_298294_, false);
-      PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(p_298294_);
+      ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(uuid, false);
+      PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(uuid);
       PlayerFaceRenderer.draw(p_281255_, playerskin.texture(), p_281818_, p_281791_, p_282088_);
    }
 }

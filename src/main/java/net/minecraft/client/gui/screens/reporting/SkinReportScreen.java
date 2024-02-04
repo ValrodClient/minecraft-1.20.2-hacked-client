@@ -48,34 +48,44 @@ public class SkinReportScreen extends AbstractReportScreen<SkinReport.Builder> {
    protected void init() {
       this.layout.defaultCellSetting().alignHorizontallyCenter();
       this.layout.addChild(new StringWidget(this.title, this.font));
+      
       LinearLayout linearlayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
       linearlayout.defaultCellSetting().alignVerticallyMiddle();
       linearlayout.addChild(new PlayerSkinWidget(85, 120, this.minecraft.getEntityModels(), this.reportBuilder.report().getSkinGetter()));
       LinearLayout linearlayout1 = linearlayout.addChild(LinearLayout.vertical().spacing(8));
+      
       this.selectReasonButton = Button.builder(SELECT_REASON, (p_299380_) -> {
          this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), (p_299180_) -> {
             this.reportBuilder.setReason(p_299180_);
             this.onReportChanged();
          }));
       }).width(178).build();
+      
       linearlayout1.addChild(CommonLayouts.labeledElement(this.font, this.selectReasonButton, OBSERVED_WHAT_LABEL));
+      
       this.commentBox = this.createCommentBox(178, 9 * 8, (p_300794_) -> {
          this.reportBuilder.setComments(p_300794_);
          this.onReportChanged();
       });
+      
       linearlayout1.addChild(CommonLayouts.labeledElement(this.font, this.commentBox, MORE_COMMENTS_LABEL, (p_299506_) -> {
          p_299506_.paddingBottom(12);
       }));
+      
       LinearLayout linearlayout2 = this.layout.addChild(LinearLayout.horizontal().spacing(8));
+      
       linearlayout2.addChild(Button.builder(CommonComponents.GUI_BACK, (p_297277_) -> {
          this.onClose();
       }).width(120).build());
+      
       this.sendButton = linearlayout2.addChild(Button.builder(SEND_REPORT, (p_301073_) -> {
          this.sendReport();
       }).width(120).build());
+      
       this.layout.visitWidgets((p_297791_) -> {
          AbstractWidget abstractwidget = this.addRenderableWidget(p_297791_);
       });
+      
       this.repositionElements();
       this.onReportChanged();
    }
