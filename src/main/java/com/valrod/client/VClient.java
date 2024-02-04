@@ -9,6 +9,8 @@ import com.valrod.utils.SessionLoginThread;
 
 public class VClient {
 
+	public static final long startTime = System.currentTimeMillis();
+	
 	public static final String USERNAME = "Valrod";
 	public static final String CLIENT_NAME = "ValrodClient";
 	public static final String CLIENT_VERSION = "dev";
