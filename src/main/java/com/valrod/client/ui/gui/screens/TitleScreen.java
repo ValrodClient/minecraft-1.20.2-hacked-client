@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 import com.mojang.authlib.minecraft.BanDetails;
+import com.valrod.client.VClient;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -87,8 +88,11 @@ public class TitleScreen extends Screen {
 
 	public void render(GuiGraphics g, int mouseX, int mouseY, float pt) {
 		super.render(g, mouseX, mouseY, pt);
-
-		//		g.drawCenteredString(this.font, this.title, mouseX, mouseY, 16777215);
+		g.pose().pushPose();
+		g.pose().translate(this.width/2, this.height / 4 - 50, 0F);	
+		g.pose().scale(3F, 3F, 0F);
+		g.drawCenteredString(this.font, VClient.CLIENT_NAME, 0, 0, 16777215);
+		g.pose().popPose();
 	}
 
 	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
