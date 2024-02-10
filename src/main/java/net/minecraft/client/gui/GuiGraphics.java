@@ -89,7 +89,7 @@ public class GuiGraphics {
 
    /** @deprecated */
    @Deprecated
-   private void flushIfUnmanaged() {
+public void flushIfUnmanaged() {
       if (!this.managed) {
          this.flush();
       }
@@ -118,12 +118,12 @@ public class GuiGraphics {
    }
 
    public MultiBufferSource.BufferSource bufferSource() {
-      return this.bufferSource;
+      return this.getBufferSource();
    }
 
    public void flush() {
       RenderSystem.disableDepthTest();
-      this.bufferSource.endBatch();
+      this.getBufferSource().endBatch();
       RenderSystem.enableDepthTest();
    }
 
@@ -180,46 +180,46 @@ public class GuiGraphics {
 
    }
 
-   public void setColor(float p_281272_, float p_281734_, float p_282022_, float p_281752_) {
+   public void setColor(float r, float g, float b, float a) {
       this.flushIfManaged();
-      RenderSystem.setShaderColor(p_281272_, p_281734_, p_282022_, p_281752_);
+      RenderSystem.setShaderColor(r, g, b, a);
    }
 
    public void fill(int x, int y, int endX, int endY, int color) {
       this.fill(x, y, endX, endY, 0, color);
    }
 
-   public void fill(int p_281437_, int p_283660_, int p_282606_, int p_283413_, int p_283428_, int p_283253_) {
-      this.fill(RenderType.gui(), p_281437_, p_283660_, p_282606_, p_283413_, p_283428_, p_283253_);
+   public void fill(int xStart, int yStart, int xEnd, int yEnd, int zPos, int color) {
+      this.fill(RenderType.gui(), xStart, yStart, xEnd, yEnd, zPos, color);
    }
 
-   public void fill(RenderType p_286602_, int p_286738_, int p_286614_, int p_286741_, int p_286610_, int p_286560_) {
-      this.fill(p_286602_, p_286738_, p_286614_, p_286741_, p_286610_, 0, p_286560_);
+   public void fill(RenderType renderType, int xStart, int yStart, int xEnd, int yEnd, int color) {
+      this.fill(renderType, xStart, yStart, xEnd, yEnd, 0, color);
    }
 
-   public void fill(RenderType p_286711_, int p_286234_, int p_286444_, int p_286244_, int p_286411_, int p_286671_, int p_286599_) {
+   public void fill(RenderType renderType, int xStart, int yStart, int xEnd, int yEnd, int zPos, int color) {
       Matrix4f matrix4f = this.pose.last().pose();
-      if (p_286234_ < p_286244_) {
-         int i = p_286234_;
-         p_286234_ = p_286244_;
-         p_286244_ = i;
+      if (xStart < xEnd) {
+         int i = xStart;
+         xStart = xEnd;
+         xEnd = i;
       }
 
-      if (p_286444_ < p_286411_) {
-         int j = p_286444_;
-         p_286444_ = p_286411_;
-         p_286411_ = j;
+      if (yStart < yEnd) {
+         int j = yStart;
+         yStart = yEnd;
+         yEnd = j;
       }
 
-      float f3 = (float)FastColor.ARGB32.alpha(p_286599_) / 255.0F;
-      float f = (float)FastColor.ARGB32.red(p_286599_) / 255.0F;
-      float f1 = (float)FastColor.ARGB32.green(p_286599_) / 255.0F;
-      float f2 = (float)FastColor.ARGB32.blue(p_286599_) / 255.0F;
-      VertexConsumer vertexconsumer = this.bufferSource.getBuffer(p_286711_);
-      vertexconsumer.vertex(matrix4f, (float)p_286234_, (float)p_286444_, (float)p_286671_).color(f, f1, f2, f3).endVertex();
-      vertexconsumer.vertex(matrix4f, (float)p_286234_, (float)p_286411_, (float)p_286671_).color(f, f1, f2, f3).endVertex();
-      vertexconsumer.vertex(matrix4f, (float)p_286244_, (float)p_286411_, (float)p_286671_).color(f, f1, f2, f3).endVertex();
-      vertexconsumer.vertex(matrix4f, (float)p_286244_, (float)p_286444_, (float)p_286671_).color(f, f1, f2, f3).endVertex();
+      float a = (float)FastColor.ARGB32.alpha(color) / 255.0F;
+      float r = (float)FastColor.ARGB32.red(color) / 255.0F;
+      float g = (float)FastColor.ARGB32.green(color) / 255.0F;
+      float b = (float)FastColor.ARGB32.blue(color) / 255.0F;
+      VertexConsumer vertexconsumer = this.getBufferSource().getBuffer(renderType);
+      vertexconsumer.vertex(matrix4f, (float)xStart, (float)yStart, (float)zPos).color(r, g, b, a).endVertex();
+      vertexconsumer.vertex(matrix4f, (float)xStart, (float)yEnd, (float)zPos).color(r, g, b, a).endVertex();
+      vertexconsumer.vertex(matrix4f, (float)xEnd, (float)yEnd, (float)zPos).color(r, g, b, a).endVertex();
+      vertexconsumer.vertex(matrix4f, (float)xEnd, (float)yStart, (float)zPos).color(r, g, b, a).endVertex();
       this.flushIfUnmanaged();
    }
 
@@ -232,7 +232,7 @@ public class GuiGraphics {
    }
 
    public void fillGradient(RenderType p_286522_, int p_286535_, int p_286839_, int p_286242_, int p_286856_, int p_286809_, int p_286833_, int p_286706_) {
-      VertexConsumer vertexconsumer = this.bufferSource.getBuffer(p_286522_);
+      VertexConsumer vertexconsumer = this.getBufferSource().getBuffer(p_286522_);
       this.fillGradient(vertexconsumer, p_286535_, p_286839_, p_286242_, p_286856_, p_286706_, p_286809_, p_286833_);
       this.flushIfUnmanaged();
    }
@@ -274,7 +274,7 @@ public class GuiGraphics {
       if (text == null) {
          return 0;
       } else {
-         int i = font.drawInBatch(text, (float)x, (float)y, color, shadow, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
+         int i = font.drawInBatch(text, (float)x, (float)y, color, shadow, this.pose.last().pose(), this.getBufferSource(), Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
          this.flushIfUnmanaged();
          return i;
       }
@@ -285,7 +285,7 @@ public class GuiGraphics {
    }
 
    public int drawString(Font p_282636_, FormattedCharSequence p_281596_, int p_281586_, int p_282816_, int p_281743_, boolean p_282394_) {
-      int i = p_282636_.drawInBatch(p_281596_, (float)p_281586_, (float)p_282816_, p_281743_, p_282394_, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+      int i = p_282636_.drawInBatch(p_281596_, (float)p_281586_, (float)p_282816_, p_281743_, p_282394_, this.pose.last().pose(), this.getBufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
       this.flushIfUnmanaged();
       return i;
    }
@@ -618,7 +618,7 @@ public class GuiGraphics {
 
          for(int l1 = 0; l1 < p_282615_.size(); ++l1) {
             ClientTooltipComponent clienttooltipcomponent1 = p_282615_.get(l1);
-            clienttooltipcomponent1.renderText(p_282675_, l, k1, this.pose.last().pose(), this.bufferSource);
+            clienttooltipcomponent1.renderText(p_282675_, l, k1, this.pose.last().pose(), this.getBufferSource());
             k1 += clienttooltipcomponent1.getHeight() + (l1 == 0 ? 2 : 0);
          }
 
@@ -657,7 +657,11 @@ public class GuiGraphics {
       }
    }
 
-   @OnlyIn(Dist.CLIENT)
+   public MultiBufferSource.BufferSource getBufferSource() {
+	return bufferSource;
+}
+
+@OnlyIn(Dist.CLIENT)
    static class ScissorStack {
       private final Deque<ScreenRectangle> stack = new ArrayDeque<>();
 

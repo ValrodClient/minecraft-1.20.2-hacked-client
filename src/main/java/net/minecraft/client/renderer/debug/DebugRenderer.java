@@ -143,8 +143,8 @@ public class DebugRenderer {
       }
    }
 
-   public static void renderFilledBox(PoseStack p_271017_, MultiBufferSource p_270356_, AABB p_270833_, float p_270850_, float p_270249_, float p_270654_, float p_270476_) {
-      renderFilledBox(p_271017_, p_270356_, p_270833_.minX, p_270833_.minY, p_270833_.minZ, p_270833_.maxX, p_270833_.maxY, p_270833_.maxZ, p_270850_, p_270249_, p_270654_, p_270476_);
+   public static void renderFilledBox(PoseStack stack, MultiBufferSource mbs, AABB p_270833_, float p_270850_, float p_270249_, float p_270654_, float p_270476_) {
+      renderFilledBox(stack, mbs, p_270833_.minX, p_270833_.minY, p_270833_.minZ, p_270833_.maxX, p_270833_.maxY, p_270833_.maxZ, p_270850_, p_270249_, p_270654_, p_270476_);
    }
 
    public static void renderFilledBox(PoseStack p_270616_, MultiBufferSource p_270769_, double p_270653_, double p_270967_, double p_270556_, double p_270724_, double p_270427_, double p_270138_, float p_270391_, float p_270093_, float p_270312_, float p_270567_) {

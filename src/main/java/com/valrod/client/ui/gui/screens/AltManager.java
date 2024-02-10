@@ -1,8 +1,8 @@
 package com.valrod.client.ui.gui.screens;
 
+import com.valrod.client.ui.gui.components.LocalPlayerSkinWidget;
 import com.valrod.client.ui.gui.components.PasswordBox;
 import com.valrod.utils.SessionLoginThread;
-import com.valrod.utils.rendering.CustomPlayerSkinWidget;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -69,7 +69,7 @@ public class AltManager extends Screen {
 		this.addRenderableWidget(this.passwordEditBox);
 
 		// Player skin widget
-		CustomPlayerSkinWidget playerSkinWidget = new CustomPlayerSkinWidget(xCenter - 140, l - 50, 150, this.minecraft.getEntityModels());
+		LocalPlayerSkinWidget playerSkinWidget = new LocalPlayerSkinWidget(xCenter - 140, l - 50, 150);
 		this.addRenderableWidget(playerSkinWidget);
 
 		// Previous button

@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.valrod.client.VClient;
+import com.valrod.client.events.EventEntityRender;
+
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
@@ -128,44 +131,44 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
       return entityrenderer.shouldRender(p_114398_, p_114399_, p_114400_, p_114401_, p_114402_);
    }
 
-   public <E extends Entity> void render(E p_114385_, double p_114386_, double p_114387_, double p_114388_, float p_114389_, float p_114390_, PoseStack poseStack, MultiBufferSource mbs, int p_114393_) {
-      EntityRenderer<? super E> entityrenderer = this.getRenderer(p_114385_);
-
+   public <E extends Entity> void render(E ent, double x, double y, double z, float p_114389_, float partialTick, PoseStack poseStack, MultiBufferSource mbs, int uv) {
+      EntityRenderer<? super E> entityrenderer = this.getRenderer(ent);
+      
       try {
-         Vec3 vec3 = entityrenderer.getRenderOffset(p_114385_, p_114390_);
-         double d2 = p_114386_ + vec3.x();
-         double d3 = p_114387_ + vec3.y();
-         double d0 = p_114388_ + vec3.z();
+         Vec3 vec3 = entityrenderer.getRenderOffset(ent, partialTick);
+         double d2 = x + vec3.x();
+         double d3 = y + vec3.y();
+         double d0 = z + vec3.z();
          poseStack.pushPose();
          poseStack.translate(d2, d3, d0);
-         entityrenderer.render(p_114385_, p_114389_, p_114390_, poseStack, mbs, p_114393_);
-         if (p_114385_.displayFireAnimation()) {
-            this.renderFlame(poseStack, mbs, p_114385_);
+         entityrenderer.render(ent, p_114389_, partialTick, poseStack, mbs, uv);
+         if (ent.displayFireAnimation()) {
+            this.renderFlame(poseStack, mbs, ent);
          }
 
          poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-         if (this.options.entityShadows().get() && this.shouldRenderShadow && entityrenderer.shadowRadius > 0.0F && !p_114385_.isInvisible()) {
-            double d1 = this.distanceToSqr(p_114385_.getX(), p_114385_.getY(), p_114385_.getZ());
+         if (this.options.entityShadows().get() && this.shouldRenderShadow && entityrenderer.shadowRadius > 0.0F && !ent.isInvisible()) {
+            double d1 = this.distanceToSqr(ent.getX(), ent.getY(), ent.getZ());
             float f = (float)((1.0D - d1 / 256.0D) * (double)entityrenderer.shadowStrength);
             if (f > 0.0F) {
-               renderShadow(poseStack, mbs, p_114385_, f, p_114390_, this.level, Math.min(entityrenderer.shadowRadius, 32.0F));
+               renderShadow(poseStack, mbs, ent, f, partialTick, this.level, Math.min(entityrenderer.shadowRadius, 32.0F));
             }
          }
 
-         if (this.renderHitBoxes && !p_114385_.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-            renderHitbox(poseStack, mbs.getBuffer(RenderType.lines()), p_114385_, p_114390_);
+         if (this.renderHitBoxes && !ent.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
+            renderHitbox(poseStack, mbs.getBuffer(RenderType.lines()), ent, partialTick);
          }
 
          poseStack.popPose();
       } catch (Throwable throwable) {
          CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering entity in world");
          CrashReportCategory crashreportcategory = crashreport.addCategory("Entity being rendered");
-         p_114385_.fillCrashReportCategory(crashreportcategory);
+         ent.fillCrashReportCategory(crashreportcategory);
          CrashReportCategory crashreportcategory1 = crashreport.addCategory("Renderer details");
          crashreportcategory1.setDetail("Assigned renderer", entityrenderer);
-         crashreportcategory1.setDetail("Location", CrashReportCategory.formatLocation(this.level, p_114386_, p_114387_, p_114388_));
+         crashreportcategory1.setDetail("Location", CrashReportCategory.formatLocation(this.level, x, y, z));
          crashreportcategory1.setDetail("Rotation", p_114389_);
-         crashreportcategory1.setDetail("Delta", p_114390_);
+         crashreportcategory1.setDetail("Delta", partialTick);
          throw new ReportedException(crashreport);
       }
    }

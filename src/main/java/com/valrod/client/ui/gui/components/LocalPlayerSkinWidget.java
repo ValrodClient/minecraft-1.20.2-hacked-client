@@ -1,4 +1,4 @@
-package com.valrod.utils.rendering;
+package com.valrod.client.ui.gui.components;
 
 import java.util.UUID;
 
@@ -28,31 +28,29 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class CustomPlayerSkinWidget extends AbstractWidget {
-	private static final float MODEL_OFFSET = 0.0625F;
-	private static final float MODEL_HEIGHT = 2.125F;
-	private static final float Z_OFFSET = 100.0F;
-	private final CustomPlayerSkinWidget.Model model;
+public class LocalPlayerSkinWidget extends AbstractWidget {
+	private final LocalPlayerSkinWidget.Model model;
 	private PlayerSkin skin;
 	private UUID uuid;
 	private float rotationX = -8.0F;
 	private float rotationY;
 	private int tick = 0;
 	private long lastSkinChange;
+	private Minecraft mc;
 
-	public CustomPlayerSkinWidget(int x, int y, int height, EntityModelSet model) {
+	public LocalPlayerSkinWidget(int x, int y, int height) {
 		super(x, y, 0, height, CommonComponents.EMPTY);
-		this.model = CustomPlayerSkinWidget.Model.bake(model);
+		this.mc = Minecraft.getInstance();
+		this.model = LocalPlayerSkinWidget.Model.bake(this.mc.getEntityModels());
 		this.lastSkinChange = 0;
 		updateSkin();
 	}
 
 
 	private void updateSkin() {
-		Minecraft minecraft = Minecraft.getInstance();
-		UUID playerID = minecraft.user.getProfileId();
-		ProfileResult profileresult = minecraft.getMinecraftSessionService().fetchProfile(playerID, false);
-		PlayerSkin playerskin = profileresult != null ? minecraft.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(playerID);
+		UUID playerID = this.mc.user.getProfileId();
+		ProfileResult profileresult = this.mc.getMinecraftSessionService().fetchProfile(playerID, false);
+		PlayerSkin playerskin = profileresult != null ? this.mc.getSkinManager().getInsecureSkin(profileresult.profile()) : DefaultPlayerSkin.get(playerID);
 
 		if(this.uuid != playerID) {
 			this.lastSkinChange = System.currentTimeMillis();
@@ -108,12 +106,12 @@ public class CustomPlayerSkinWidget extends AbstractWidget {
 
 	@OnlyIn(Dist.CLIENT)
 	static record Model(PlayerModel<?> wideModel, PlayerModel<?> slimModel) {
-		public static CustomPlayerSkinWidget.Model bake(EntityModelSet p_300414_) {
+		public static LocalPlayerSkinWidget.Model bake(EntityModelSet p_300414_) {
 			PlayerModel<?> playermodel = new PlayerModel(p_300414_.bakeLayer(ModelLayers.PLAYER), false);
 			PlayerModel<?> playermodel1 = new PlayerModel(p_300414_.bakeLayer(ModelLayers.PLAYER_SLIM), true);
 			playermodel.young = false;
 			playermodel1.young = false;
-			return new CustomPlayerSkinWidget.Model(playermodel, playermodel1);
+			return new LocalPlayerSkinWidget.Model(playermodel, playermodel1);
 		}
 
 		public void render(GuiGraphics g, PlayerSkin skin) {

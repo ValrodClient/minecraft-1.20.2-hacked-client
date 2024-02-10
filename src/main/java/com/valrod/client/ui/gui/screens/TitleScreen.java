@@ -1,5 +1,6 @@
 package com.valrod.client.ui.gui.screens;
 
+import java.awt.Color;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -7,7 +8,9 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 import com.mojang.authlib.minecraft.BanDetails;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.valrod.client.VClient;
+import com.valrod.utils.rendering.GuiRenderingUtils;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -93,6 +96,10 @@ public class TitleScreen extends Screen {
 		g.pose().scale(3F, 3F, 0F);
 		g.drawCenteredString(this.font, VClient.CLIENT_NAME, 0, 0, 16777215);
 		g.pose().popPose();
+
+//		RenderSystem.limitDisplayFPS(1);
+//		GuiRenderingUtils.circle(g, 40, 40, 20, Color.red.getRGB());
+
 	}
 
 	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {

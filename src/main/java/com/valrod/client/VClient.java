@@ -1,11 +1,11 @@
 package com.valrod.client;
 
-import com.valrod.client.modules.ModuleManager;
-import com.valrod.client.modules.movement.Fly;
-import com.valrod.client.modules.render.PlayerESP;
-import com.valrod.client.modules.ui.HUD;
 import com.valrod.client.ui.ingame.notifications.NotificationManager;
-import com.valrod.utils.SessionLoginThread;
+import com.valrod.client.modules.ModuleManager;
+
+import com.valrod.client.modules.implement.movement.*;
+import com.valrod.client.modules.implement.render.*;
+import com.valrod.client.modules.implement.ui.*;
 
 public class VClient {
 
@@ -22,9 +22,10 @@ public class VClient {
 		moduleManager = new ModuleManager();
 		notificationManager = new NotificationManager();
 
-		moduleManager.register(new Fly());
-		moduleManager.register(new PlayerESP());
-		moduleManager.register(new HUD());
+		moduleManager.register(new ModuleFly());
+		moduleManager.register(new ModulePlayerESP());
+		moduleManager.register(new ModuleHUD());
+		moduleManager.register(new ModuleNametags());
 		
 		moduleManager.enableModule("HUD");
 	}

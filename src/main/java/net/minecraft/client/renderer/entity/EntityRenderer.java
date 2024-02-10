@@ -21,13 +21,13 @@ import org.joml.Matrix4f;
 public abstract class EntityRenderer<T extends Entity> {
    protected static final float NAMETAG_SCALE = 0.025F;
    protected final EntityRenderDispatcher entityRenderDispatcher;
-   private final Font font;
+   private static Font font;
    protected float shadowRadius;
    protected float shadowStrength = 1.0F;
 
    protected EntityRenderer(EntityRendererProvider.Context p_174008_) {
       this.entityRenderDispatcher = p_174008_.getEntityRenderDispatcher();
-      this.font = p_174008_.getFont();
+      font = p_174008_.getFont();
    }
 
    public final int getPackedLightCoords(T p_114506_, float p_114507_) {
@@ -74,31 +74,31 @@ public abstract class EntityRenderer<T extends Entity> {
 
    public abstract ResourceLocation getTextureLocation(T p_114482_);
 
-   public Font getFont() {
-      return this.font;
+   public static Font getFont() {
+      return font;
    }
 
-   protected void renderNameTag(T p_114498_, Component p_114499_, PoseStack p_114500_, MultiBufferSource p_114501_, int p_114502_) {
-      double d0 = this.entityRenderDispatcher.distanceToSqr(p_114498_);
+   protected void renderNameTag(T ent, Component text, PoseStack pose, MultiBufferSource mbs, int uv) {
+      double d0 = this.entityRenderDispatcher.distanceToSqr(ent);
       if (!(d0 > 4096.0D)) {
-         boolean flag = !p_114498_.isDiscrete();
-         float f = p_114498_.getNameTagOffsetY();
-         int i = "deadmau5".equals(p_114499_.getString()) ? -10 : 0;
-         p_114500_.pushPose();
-         p_114500_.translate(0.0F, f, 0.0F);
-         p_114500_.mulPose(this.entityRenderDispatcher.cameraOrientation());
-         p_114500_.scale(-0.025F, -0.025F, 0.025F);
-         Matrix4f matrix4f = p_114500_.last().pose();
+         boolean flag = !ent.isDiscrete();
+         float f = ent.getNameTagOffsetY();
+         int i = "deadmau5".equals(text.getString()) ? -10 : 0;
+         pose.pushPose();
+         pose.translate(0.0F, f, 0.0F);
+         pose.mulPose(this.entityRenderDispatcher.cameraOrientation());
+         pose.scale(-0.025F, -0.025F, 0.025F);
+         Matrix4f matrix4f = pose.last().pose();
          float f1 = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
          int j = (int)(f1 * 255.0F) << 24;
          Font font = this.getFont();
-         float f2 = (float)(-font.width(p_114499_) / 2);
-         font.drawInBatch(p_114499_, f2, (float)i, 553648127, false, matrix4f, p_114501_, flag ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, j, p_114502_);
+         float f2 = (float)(-font.width(text) / 2);
+         font.drawInBatch(text, f2, (float)i, 553648127, false, matrix4f, mbs, flag ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, j, uv);
          if (flag) {
-            font.drawInBatch(p_114499_, f2, (float)i, -1, false, matrix4f, p_114501_, Font.DisplayMode.NORMAL, 0, p_114502_);
+            font.drawInBatch(text, f2, (float)i, -1, false, matrix4f, mbs, Font.DisplayMode.NORMAL, 0, uv);
          }
 
-         p_114500_.popPose();
+         pose.popPose();
       }
    }
 }
