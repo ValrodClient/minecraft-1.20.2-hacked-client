@@ -21,6 +21,9 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
+import com.valrod.client.VClient;
+import com.valrod.client.events.EventEntityRender;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -176,9 +179,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
    private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<>();
    private final Map<BlockPos, SoundInstance> playingRecords = Maps.newHashMap();
    @Nullable
-   private RenderTarget entityTarget;
+   public RenderTarget entityTarget;
    @Nullable
-   private PostChain entityEffect;
+   public PostChain entityEffect;
    @Nullable
    private RenderTarget translucentTarget;
    @Nullable
@@ -929,7 +932,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
       boolean shouldRenderOutline = false;
       MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-      // GOTO entity outline
       for(Entity entity : this.level.entitiesForRendering()) {
          if (this.entityRenderDispatcher.shouldRender(entity, frustum, posX, posY, posZ) || entity.hasIndirectPassenger(this.minecraft.player)) {
             BlockPos blockpos = entity.blockPosition();
@@ -951,7 +953,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
                } else {
                   multibuffersource = multibuffersource$buffersource;
                }
-
+               
+               EventEntityRender eventEntityRender = new EventEntityRender(entity, posX, posY, posZ, poseStack, multibuffersource, partialTick);
+               VClient.getModuleManager().onEvent(eventEntityRender);
+               
+               multibuffersource = eventEntityRender.getMbs();
+               shouldRenderOutline = eventEntityRender.shouldRenderOutline();
+               
                this.renderEntity(entity, posX, posY, posZ, partialTick, poseStack, multibuffersource);
             }
          }
@@ -1146,12 +1154,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
       }
    }
 
-   private void renderEntity(Entity p_109518_, double p_109519_, double p_109520_, double p_109521_, float p_109522_, PoseStack p_109523_, MultiBufferSource p_109524_) {
-      double d0 = Mth.lerp((double)p_109522_, p_109518_.xOld, p_109518_.getX());
-      double d1 = Mth.lerp((double)p_109522_, p_109518_.yOld, p_109518_.getY());
-      double d2 = Mth.lerp((double)p_109522_, p_109518_.zOld, p_109518_.getZ());
-      float f = Mth.lerp(p_109522_, p_109518_.yRotO, p_109518_.getYRot());
-      this.entityRenderDispatcher.render(p_109518_, d0 - p_109519_, d1 - p_109520_, d2 - p_109521_, f, p_109522_, p_109523_, p_109524_, this.entityRenderDispatcher.getPackedLightCoords(p_109518_, p_109522_));
+   private void renderEntity(Entity p_109518_, double p_109519_, double p_109520_, double p_109521_, float partialTick, PoseStack p_109523_, MultiBufferSource p_109524_) {
+      double d0 = Mth.lerp((double)partialTick, p_109518_.xOld, p_109518_.getX());
+      double d1 = Mth.lerp((double)partialTick, p_109518_.yOld, p_109518_.getY());
+      double d2 = Mth.lerp((double)partialTick, p_109518_.zOld, p_109518_.getZ());
+      float f = Mth.lerp(partialTick, p_109518_.yRotO, p_109518_.getYRot());
+      this.entityRenderDispatcher.render(p_109518_, d0 - p_109519_, d1 - p_109520_, d2 - p_109521_, f, partialTick, p_109523_, p_109524_, this.entityRenderDispatcher.getPackedLightCoords(p_109518_, partialTick));
    }
 
    private void renderSectionLayer(RenderType p_298012_, PoseStack p_298121_, double p_298706_, double p_299730_, double p_298956_, Matrix4f p_297481_) {
