@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
@@ -25,8 +24,8 @@ public class Notification {
 	private final int notifHeight = (Minecraft.getInstance().font.lineHeight * 2) + (textMargin * 3);
 	private final int marginToScreen = 4;
 
-	final int backgroundColor = new Color(0, 0, 0, 230).getRGB();
-	final int textColor = new Color(245, 245, 245).getRGB();
+	private final int backgroundColor = new Color(0, 0, 0, 230).getRGB();
+	private final int textColor = new Color(245, 245, 245).getRGB();
 	
 	public Notification(NotificationType type, String title, String messsage, int length) {
 		this.type = type;
@@ -61,29 +60,38 @@ public class Notification {
 		final int windowWidth = g.guiWidth();
 		final int windowHeight = g.guiHeight();
 
-		double offsetX = 0;
-		double offsetY = 0;
+		float offsetX = 0;
+		float offsetY = 0;
 		long time = getTime();
 
 		if (time < fadedIn) {
 			// is poping in
-			offsetX = Math.tanh(time / fadedIn * 5.0);
-			offsetY = Math.tanh(time / fadedIn * 3.0);
+			offsetX = (float) Math.tanh(time / fadedIn * 5.0);
+			offsetY = (float) Math.tanh(time / fadedIn * 3.0);
 		} else if (time > fadeOut) {
 			// is poping out
-			offsetX = (Math.tanh(3.0 - (time - fadeOut) / (end - fadeOut) * 4.0));
+			offsetX = (float) (Math.tanh(3.0 - (time - fadeOut) / (end - fadeOut) * 4.0));
 			offsetY = 1;
 		} else {
 			// normal
 			offsetX = offsetY = 1;
 		}
 		
+		float opacityFactor = Mth.clamp((offsetX - 0.2F) * 1.4F, 0F, 1F);
+		
 		int notifX = windowWidth - (int)(this.notifWidth * offsetX) - this.marginToScreen;
 		int notifY = windowHeight - (int)(this.notifHeight * offsetY) - this.marginToScreen - 2;
+		
+		g.pose().pushPose();
+		g.enableScissor(notifX, notifY, notifX + this.notifWidth - this.statusBarWidth, notifY + this.notifHeight);
+		g.setColor(1F, 1F, 1F, opacityFactor);
 		
 		g.fill(notifX + this.statusBarWidth, notifY, notifX + this.notifWidth - this.statusBarWidth, notifY + this.notifHeight, this.backgroundColor); // Draw background
 		g.fill(notifX, notifY, notifX + this.statusBarWidth, notifY + this.notifHeight, this.notificationColor); // Draw notification type color bar
 		g.drawString(font, this.title, notifX + this.textMargin + this.statusBarWidth, notifY + this.textMargin, this.textColor); // Draw title
 		g.drawString(font, this.description, notifX + this.textMargin + this.statusBarWidth, notifY + font.lineHeight + (this.textMargin * 2), this.textColor); // Draw description
+	
+		g.disableScissor();
+		g.pose().popPose();
 	}
 }
